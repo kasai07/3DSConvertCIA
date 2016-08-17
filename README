@@ -1,0 +1,21 @@
+#merci a @d0k3 pour son code source de decrypt9 ainsi qu'a tous ceux qui y participe#
+
+#et qui ma permis de faire cet homebrew#
+
+#et a @Rinnegatamante pour son code de big red menu#
+
+
+
+prérequis:
+
+a la racine SD vous devez avoir ces chemins
+
+SD/Game3ds/nds  pour les jeux dumper au format .nds
+
+SD/Game3ds/3ds  pour les jeux dumper ou a convertir au format .3ds
+
+SD/Game3ds/cia  pour les jeux dumper ou converi au format .cia
+
+le header pour les cartouches de jeux iront dans
+
+SD/Game3ds
