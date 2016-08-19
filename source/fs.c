@@ -5,7 +5,7 @@
 #include "keys.h"
 #include "tga.h"
 #include "pathmenu.h"
-
+#include "progression.h"
 #include "game.h"
 #include "i2c.h"
 #include "fatfs/ff.h"
@@ -40,9 +40,8 @@ bool InitFS()
 {
     bool ret = fs_ok = (f_mount(&fs, "0:", 1) == FR_OK);
     if (ret)
-        f_chdir(GetWorkDir());
-
-    return ret;
+	f_chdir(GetWorkDir());
+	return ret;
 }
 
 void DeinitFS()
@@ -537,20 +536,64 @@ u32 DeleteFileGame(u32 index, u32 extension)
 
 }
 
+
+
+
 #if !defined(ALT_PROGRESS)
 void ShowProgress(u64 current, u64 total)
 {
-    const u32 progX = SCREEN_WIDTH_TOP - 40;
-    const u32 progY = SCREEN_HEIGHT - 20;
     
-    if (total > 0) {
+
+	u32 prog = (current * 100) / total;
+	if(prog == 99)Cart.count = 0;
+	
+	u8 r,g,b;
+	for(int f = 0; f < prog; f++)
+	{
+	int jaugedir = 0;
+	for(int i = 10; 0 < i; i--)
+	{	 
+		
+		for(int j = 0; j < 2; j++)	
+		{
+			
+			b = (jauge[jaugedir++]);
+			g = (jauge[jaugedir++]);
+			r = (jauge[jaugedir++]);
+			SET_PIXEL(TOP_SCREEN0, (100 + (f * 2) + j), (213+i), RGBCOLOR(r,g,b));
+			
+		}			
+	}
+	}
+	if(Cart.count == 0)	
+	{
+		int barredir = 0;
+		for(int i = 16; 0 < i; i--)
+		{	 
+			for(int j = 0; j < 200; j++)	
+			{
+				
+				b = (barre[barredir++]);
+				g = (barre[barredir++]);
+				r = (barre[barredir++]);
+				SET_PIXEL(TOP_SCREEN0, (100 + j), (210+i), RGBCOLOR(r,g,b));
+				
+			}			
+		}
+		Cart.count++;
+	}
+	if (total > 0) {
         char progStr[8];
         snprintf(progStr, 8, "%3llu%%", (current * 100) / total);
-        DrawString(TOP_SCREEN0, progStr, progX, progY, WHITE, BLACK);
-        DrawString(TOP_SCREEN1, progStr, progX, progY, WHITE, BLACK);
+		DrawString(TOP_SCREEN0, progStr, 184, 230, WHITE, BLACK);
+        DrawString(TOP_SCREEN1, progStr, 184, 230, WHITE, BLACK);
     } else {
-        DrawString(TOP_SCREEN0, "    ", progX, progY, WHITE, BLACK);
-        DrawString(TOP_SCREEN1, "    ", progX, progY, WHITE, BLACK);
-    }
+		DrawString(TOP_SCREEN0, "    ", 184, 230, WHITE, BLACK);
+        DrawString(TOP_SCREEN1, "    ", 184, 230, WHITE, BLACK);
+	}
+
 }
 #endif
+
+
+

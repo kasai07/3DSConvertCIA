@@ -6,6 +6,7 @@
 #define GAME_DIRS   "/Game3ds"
 #define WORK_DIRS   "/payload_a9lh"
 
+
 u32 Wait();
 u32 cartpresent();
 

@@ -220,7 +220,7 @@ u32 VerifyNcch(const char* filename, u32 offset)
     }
     
     // output results
-    Debug("Verify ExHdr/ExeFS/RomFS: %s/%s/%s", status_str[ver_exthdr], status_str[ver_exefs], status_str[ver_romfs]);
+    DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Verify ExHdr/ExeFS/RomFS: %s/%s/%s", status_str[ver_exthdr], status_str[ver_exefs], status_str[ver_romfs]);
     
     return (((ver_exthdr | ver_exefs | ver_romfs) & 1) == 0) ? 0 : 1;
 }
@@ -239,7 +239,7 @@ u32 CryptNcch(const char* filename, u32 offset, u32 size, u64 seedId, u8* encryp
  
     // check (again) for magic number
     if (memcmp(ncch->magic, "NCCH", 4) != 0) {
-        Debug("Not a NCCH container");
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Not a NCCH container");
         return 2; // not an actual error
     }
     
@@ -247,25 +247,25 @@ u32 CryptNcch(const char* filename, u32 offset, u32 size, u64 seedId, u8* encryp
     u32 size_sum = 0x200 + ((ncch->size_exthdr) ? 0x800 : 0x0) + 0x200 *
         (ncch->size_plain + ncch->size_logo + ncch->size_exefs + ncch->size_romfs);
     if (ncch->size * 0x200 < size_sum) {
-        Debug("Probably not a NCCH container");
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Probably not a NCCH container");
         return 2; // not an actual error
     }        
     
     // check if encrypted
     if (!encrypt_flags && (ncch->flags[7] & 0x04)) {
-        Debug("NCCH is not encrypted");
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"NCCH is not encrypted");
         return 2; // not an actual error
     } else if (encrypt_flags && !(ncch->flags[7] & 0x04)) {
-        Debug("NCCH is already encrypted");
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"NCCH is already encrypted");
         return 2; // not an actual error
     } else if (encrypt_flags && (encrypt_flags[7] & 0x04)) {
-        Debug("Nothing to do!");
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Nothing to do!");
         return 2; // not an actual error
     }
     
     // check size
     if ((size > 0) && (ncch->size * 0x200 > size)) {
-        Debug("NCCH size is out of bounds");
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"NCCH size is out of bounds");
         return 1;
     }
     
@@ -286,7 +286,7 @@ u32 CryptNcch(const char* filename, u32 offset, u32 size, u64 seedId, u8* encryp
     bool usesSec4Crypto = (ncch->flags[3] == 0x0B);
     bool usesFixedKey = ncch->flags[7] & 0x01;
     
-    Debug("Code / Crypto: %.16s / %s%s%s%s", ncch->productcode, (usesFixedKey) ? "FixedKey " : "", (usesSec4Crypto) ? "Secure4 " : (usesSec3Crypto) ? "Secure3 " : (uses7xCrypto) ? "7x " : "", (usesSeedCrypto) ? "Seed " : "", (!uses7xCrypto && !usesSeedCrypto && !usesFixedKey) ? "Standard" : "");
+    DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Code / Crypto: %.16s / %s%s%s%s", ncch->productcode, (usesFixedKey) ? "FixedKey " : "", (usesSec4Crypto) ? "Secure4 " : (usesSec3Crypto) ? "Secure3 " : (uses7xCrypto) ? "7x " : "", (usesSeedCrypto) ? "Seed " : "", (!uses7xCrypto && !usesSeedCrypto && !usesFixedKey) ? "Standard" : "");
     
     // setup zero key crypto
     if (usesFixedKey) {
@@ -301,22 +301,22 @@ u32 CryptNcch(const char* filename, u32 offset, u32 size, u64 seedId, u8* encryp
     
     // check 7x crypto
     if (uses7xCrypto && (CheckKeySlot(0x25, 'X') != 0)) {
-        Debug("slot0x25KeyX not set up");
-        Debug("This won't work on O3DS < 7.x or A9LH");
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"slot0x25KeyX not set up");
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"This won't work on O3DS < 7.x or A9LH");
         return 1;
     }
     
     // check Secure3 crypto on O3DS
     if (usesSec3Crypto && (CheckKeySlot(0x18, 'X') != 0)) {
-        Debug("slot0x18KeyX not set up");
-        Debug("Secure3 crypto is not available");
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"slot0x18KeyX not set up");
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Secure3 crypto is not available");
         return 1;
     }
     
     // check Secure4 crypto
     if (usesSec4Crypto && (CheckKeySlot(0x1B, 'X') != 0)) {
-        Debug("slot0x1BKeyX not set up");
-        Debug("Secure4 crypto is not available");
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"slot0x1BKeyX not set up");
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Secure4 crypto is not available");
         return 1;
     }
     
@@ -340,14 +340,14 @@ u32 CryptNcch(const char* filename, u32 offset, u32 size, u64 seedId, u8* encryp
             }
             FileClose();
             if (!found) {
-                Debug("Seed not found in seeddb.bin!");
+                DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Seed not found in seeddb.bin!");
                 return 1;
             }
         } else {
-            Debug("Need seeddb.bin for seed crypto!");
+            DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Need seeddb.bin for seed crypto!");
             return 1;
         }
-        Debug("Loading seed from seeddb.bin: ok");
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Loading seed from seeddb.bin: ok");
     }
     
     // basic setup of CryptBufferInfo structs
@@ -355,7 +355,7 @@ u32 CryptNcch(const char* filename, u32 offset, u32 size, u64 seedId, u8* encryp
     memcpy(info1.keyY, (usesSeedCrypto) ? seedKeyY : ncch->signature, 16);
     info1.keyslot = (usesSec4Crypto) ? 0x1B : ((usesSec3Crypto) ? 0x18 : ((uses7xCrypto) ? 0x25 : info0.keyslot));
     
-    Debug("%s ExHdr/ExeFS/RomFS (%ukB/%ukB/%uMB)",
+    DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"%s ExHdr/ExeFS/RomFS (%ukB/%ukB/%uMB)",
         (encrypt_flags) ? "Encrypt" : "Decrypt",
         (ncch->size_exthdr > 0) ? 0x800 / 1024 : 0,
         (ncch->size_exefs * 0x200) / 1024,
@@ -389,7 +389,7 @@ u32 CryptNcch(const char* filename, u32 offset, u32 size, u64 seedId, u8* encryp
                 if (size_exefs_file == 0)
                     continue;
                 if (offset_exefs_file % 16) {
-                    Debug("ExeFS file offset not aligned!");
+                    DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"ExeFS file offset not aligned!");
                     result |= 1;
                     break; // this should not happen
                 }
@@ -481,13 +481,13 @@ u32 CryptCia(const char* filename, u8* ncch_crypt, bool cia_encrypt, bool cxi_on
         return 1;
     
     if (FileGetSize() < cia.size_cia) {
-        Debug("Not a CIA or corrupt file");
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Not a CIA or corrupt file");
         FileClose();
         return 1;
     }
     
     if (cia.size_ticktmd > 0x10000) {
-        Debug("Ticket/TMD too big");
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Ticket/TMD too big");
         FileClose();
         return 1;
     }
@@ -503,17 +503,17 @@ u32 CryptCia(const char* filename, u8* ncch_crypt, bool cia_encrypt, bool cxi_on
     TitleMetaData* tmd = (TitleMetaData*) (buffer + align(cia.size_ticket, 64));
     TmdContentChunk* content_list = (TmdContentChunk*) (tmd + 1);
     if (memcmp(ticket->sig_type, sig_type, 4) != 0) {
-        Debug("Bad ticket signature type");
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Bad ticket signature type");
         return 1; // this should never happen
     }
     if (memcmp(tmd->sig_type, sig_type, 4) != 0) {
-        Debug("Bad TMD signature type");
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Bad TMD signature type");
         return 1; // this should never happen
     }
     
     // extract & decrypt titlekey
     if (cia.size_ticket != 0x140 + 0x210) {
-        Debug("Ticket is too small (%i byte)", cia.size_ticket);
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Ticket is too small (%i byte)", cia.size_ticket);
         return 1;
     }
     TitleKeyEntry titlekeyEntry;
@@ -527,14 +527,14 @@ u32 CryptCia(const char* filename, u8* ncch_crypt, bool cia_encrypt, bool cxi_on
     // get content data from TMD
     content_count = getbe16(tmd->content_count);
     if (content_count * 0x30 != cia.size_tmd - (0x140 + 0xC4 + (64 * 0x24))) {
-        Debug("TMD content count (%i) / list size mismatch", content_count);
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"TMD content count (%i) / list size mismatch", content_count);
         return 1;
     }
     u64 size_tmd_content = 0;
     for (u32 i = 0; i < content_count; i++)
         size_tmd_content += getbe64(content_list[i].size);
     if (size_tmd_content != cia.size_content) {
-        Debug("TMD content size / actual size mismatch");
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"TMD content size / actual size mismatch");
         return 1;
     }
     
@@ -545,7 +545,7 @@ u32 CryptCia(const char* filename, u8* ncch_crypt, bool cia_encrypt, bool cxi_on
     setup_aeskey(0x11, titlekey);
     
     if (ncch_crypt)
-        Debug("Pass #1: CIA decryption...");
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Pass #1: CIA decryption...");
     if (cxi_only) content_count = 1;
     for (u32 i = 0; i < content_count; i++) {
         u32 size = (u32) getbe64(content_list[i].size);
@@ -555,37 +555,37 @@ u32 CryptCia(const char* filename, u8* ncch_crypt, bool cia_encrypt, bool cxi_on
             continue; // depending on 'cia_encrypt' setting: not/already encrypted
         untouched = false;
         if (cia_encrypt) {
-            Debug("Verifying unencrypted content...");
+            DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Verifying unencrypted content...");
             if (CheckHashFromFile(filename, offset, size, content_list[i].hash) != 0) {
-                Debug("Verification failed!");
+                DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Verification failed!");
                 result = 1;
                 continue;
             }
-            Debug("Verified OK!");
+            DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Verified OK!");
         }
-        Debug("%scrypting Content %i of %i (%iMB)...", (cia_encrypt) ? "En" : "De", i + 1, content_count, size / (1024*1024));
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"%scrypting Content %i of %i (%iMB)...", (cia_encrypt) ? "En" : "De", i + 1, content_count, size / (1024*1024));
         memset(info.ctr, 0x00, 16);
         memcpy(info.ctr, content_list[i].index, 2);
         if (CryptSdToSd(filename, offset, size, &info, true) != 0) {
-            Debug("%scryption failed!", (cia_encrypt) ? "En" : "De");
+            DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"%scryption failed!", (cia_encrypt) ? "En" : "De");
             result = 1;
             continue;
         }
         if (!cia_encrypt) {
-            Debug("Verifying decrypted content...");
+            DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Verifying decrypted content...");
             if (CheckHashFromFile(filename, offset, size, content_list[i].hash) != 0) {
-                Debug("Verification failed!");
+                DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Verification failed!");
                 result = 1;
                 continue;
             }
-            Debug("Verified OK!");
+            DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Verified OK!");
         }
         content_list[i].type[1] ^= 0x1;
         n_processed++;
     }
     
     if (ncch_crypt && (result == 0)) {
-        Debug("Pass #2: NCCH decryption...");
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Pass #2: NCCH decryption...");
         next_offset = cia.offset_content;
         for (u32 i = 0; i < content_count; i++) {
             u32 ncch_state;
@@ -594,20 +594,20 @@ u32 CryptCia(const char* filename, u8* ncch_crypt, bool cia_encrypt, bool cxi_on
             next_offset = offset + size;
             if (content_list[i].type[1] & 0x1)
                 continue; // skip this if still CIA (shallow) encrypted
-            Debug("Processing Content %i of %i (%iMB)...", i + 1, content_count, size / (1024*1024));
+            DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Processing Content %i of %i (%iMB)...", i + 1, content_count, size / (1024*1024));
             ncch_state = CryptNcch(filename, offset, size, titleId, NULL);
             if (!(ncch_crypt[7] & 0x04) && (ncch_state != 1))
                 ncch_state = CryptNcch(filename, offset, size, titleId, ncch_crypt);
             if (ncch_state == 0) {
                 untouched = false;
-                Debug("Recalculating hash...");
+                DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Recalculating hash...");
                 if (GetHashFromFile(filename, offset, size, content_list[i].hash) != 0) {
-                    Debug("Recalculation failed!");
+                    DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Recalculation failed!");
                     result = 1;
                     continue;
                 }
             } else if (ncch_state == 1) {
-                Debug("Failed decrypting NCCH!");
+                DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Failed decrypting NCCH!");
                 result = 1;
                 continue;
             }
@@ -615,7 +615,7 @@ u32 CryptCia(const char* filename, u8* ncch_crypt, bool cia_encrypt, bool cxi_on
         }
         if (!untouched && (result == 0)) {
             // recalculate content info hashes
-            Debug("Recalculating TMD hashes...");
+            DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Recalculating TMD hashes...");
             for (u32 i = 0, kc = 0; i < 64 && kc < content_count; i++) {
                 TmdContentInfo* cntinfo = tmd->contentinfo + i;
                 u32 k = getbe16(cntinfo->cmd_count);
@@ -627,7 +627,7 @@ u32 CryptCia(const char* filename, u8* ncch_crypt, bool cia_encrypt, bool cxi_on
     }
     
     if (untouched) {
-        Debug((cia_encrypt) ? "CIA is already encrypted" : "CIA is not encrypted");
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,(cia_encrypt) ? "CIA is already encrypted" : "CIA is not encrypted");
     } else if (n_processed > 0) {
         if (!FileOpen(filename)) // already checked this file
             return 1;
@@ -658,13 +658,13 @@ u32 CryptBoss(const char* filename, bool encrypt)
         return 1;
     }
     if (memcmp(boss_magic, boss_header, 8) != 0) {
-        Debug("Not a BOSS file");
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Not a BOSS file");
         FileClose();
         return 1;
     }
     fsize = getbe32(boss_header + 8);
     if ((fsize != FileGetSize()) || (fsize < 0x52)) {
-        Debug("BOSS file has bad size");
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"BOSS file has bad size");
         FileClose();
         return 1;
     }
@@ -678,20 +678,20 @@ u32 CryptBoss(const char* filename, bool encrypt)
     sha_quick(l_sha256, content_header, 0x14, SHA256_MODE);
     encrypted = (memcmp(content_header_sha256, l_sha256, 0x20) != 0);
     if (encrypt == encrypted) {
-        Debug("BOSS is already %scrypted", (encrypted) ? "en" : "de");
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"BOSS is already %scrypted", (encrypted) ? "en" : "de");
         return 1;
     }
     
     if (!encrypted) {
-        Debug("BOSS verification: OK");
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"BOSS verification: OK");
     }
     
     // BOSS file decryption
-    Debug("%scrypting BOSS...", (encrypt) ? "En" : "De");
+    DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"%scrypting BOSS...", (encrypt) ? "En" : "De");
     memset(info.ctr, 0x00, 16);
     memcpy(info.ctr, boss_header + 0x1C, 12);
     info.ctr[15] = 0x01;
-    Debug("CTR: %08X%08X%08X%08X", getbe32(info.ctr), getbe32(info.ctr + 4), getbe32(info.ctr + 8), getbe32(info.ctr + 12));
+    DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"CTR: %08X%08X%08X%08X", getbe32(info.ctr), getbe32(info.ctr + 4), getbe32(info.ctr + 8), getbe32(info.ctr + 12));
     CryptSdToSd(filename, 0x28, fsize - 0x28, &info, false);
     
     // BOSS file verification (#2)
@@ -702,9 +702,9 @@ u32 CryptBoss(const char* filename, bool encrypt)
             return 1;
         sha_quick(l_sha256, content_header, 0x14, SHA256_MODE);
         if (memcmp(content_header_sha256, l_sha256, 0x20) == 0) {
-            Debug("BOSS verification: OK");
+            DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"BOSS verification: OK");
         } else {
-            Debug("BOSS verification: Failed");
+            DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"BOSS verification: Failed");
             return 1;
         }
     }
@@ -738,8 +738,8 @@ u32 CryptGameFiles(u32 param)
     u32 n_failed = 0;
     
     if (!batch_dir || !DebugDirOpen(batch_dir)) {
-        Debug("Game directory not found!");
-        Debug("(check readme for more info)");
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Game directory not found!");
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"(check readme for more info)");
         return 1;
     }
     
@@ -753,18 +753,18 @@ u32 CryptGameFiles(u32 param)
             continue;
         
         if (batch_ncch && (memcmp(buffer + 0x100, "NCCH", 4) == 0)) {
-            Debug("Processing NCCH \"%s\"", path + path_len);
+            DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Processing NCCH \"%s\"", path + path_len);
             if (CryptNcch(path, 0x00, 0, 0, ncch_crypt) != 1) {
-                Debug("Success!");
+                DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Success!");
                 n_processed++;
             } else {
-                Debug("Failed!");
+                DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Failed!");
                 n_failed++;
             }
         } else if (batch_ncch && (memcmp(buffer + 0x100, "NCSD", 4) == 0)) {
             if (getle64(buffer + 0x110) != 0) 
                 continue; // skip NAND backup NCSDs
-            Debug("Processing NCSD \"%s\"", path + path_len);
+            DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Processing NCSD \"%s\"", path + path_len);
             NcsdHeader* ncsd = (NcsdHeader*) buffer;
             u32 p;
             u32 nc = (cxi_only) ? 1 : 8;
@@ -774,33 +774,33 @@ u32 CryptGameFiles(u32 param)
                 u32 size = ncsd->partitions[p].size * 0x200;
                 if (size == 0) 
                     continue;
-                Debug("Partition %i (%s)", p, ncsd_partition_name[p]);
+                DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Partition %i (%s)", p, ncsd_partition_name[p]);
                 if (CryptNcch(path, offset, size, seedId, ncch_crypt) == 1)
                     break;
             }
             if ( p == nc ) {
-                Debug("Success!");
+                DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Success!");
                 n_processed++;
             } else {
-                Debug("Failed!");
+                DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Failed!");
                 n_failed++;
             }
         } else if (batch_cia && (memcmp(buffer, "\x20\x20", 2) == 0)) {
-            Debug("Processing CIA \"%s\"", path + path_len);
+            DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Processing CIA \"%s\"", path + path_len);
             if (CryptCia(path, cia_ncch_crypt, cia_encrypt, cxi_only) == 0) {
-                Debug("Success!");
+                DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Success!");
                 n_processed++;
             } else {
-                Debug("Failed!");
+                DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Failed!");
                 n_failed++;
             }
         } else if (batch_boss && (memcmp(buffer, boss_magic, 8) == 0)) {
-            Debug("Processing BOSS \"%s\"", path + path_len);
+            DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Processing BOSS \"%s\"", path + path_len);
             if (CryptBoss(path, boss_encrypt) == 0) {
                 Debug("Success!");
                 n_processed++;
             } else {
-                Debug("Failed!");
+                DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Failed!");
                 n_failed++;
             }
         }
@@ -809,10 +809,10 @@ u32 CryptGameFiles(u32 param)
     DirClose();
     
     if (n_processed) {
-        Debug("");
-        Debug("%ux processed / %ux failed ", n_processed, n_failed);
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1," ");
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"%ux processed / %ux failed ", n_processed, n_failed);
     } else if (!n_failed) {
-        Debug("Nothing found in %s/!", batch_dir);
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Nothing found in %s/!", batch_dir);
     }
     
     return !n_processed;
@@ -955,12 +955,14 @@ u32 FixCiaFile(const char* filename)
     // fetch CIA info, Ticket, TMD, content_list
     if ((FileGetData(filename, buffer, 0x4000, 0) != 0x4000) || (memcmp(buffer, "\x20\x20", 2) != 0)) {
         DebugColor(RED, TRANSPARENT, TOP_SCREEN1,"This does not look like a CIA file"); // checking an arbitrary size here
-        return 1;
+		Wait();
+		return 1;
     }
     GetCiaInfo(&cia, (CiaHeader*) buffer);
     if (cia.offset_content > 0x4000) {
         DebugColor(RED, TRANSPARENT, TOP_SCREEN1,"CIA stub has bad size (%lu)", cia.offset_content);
-        return 1;
+        Wait();
+		return 1;
     }
     TitleMetaData* tmd = (TitleMetaData*) (buffer + cia.offset_tmd);
     TmdContentChunk* content_list = (TmdContentChunk*) (tmd + 1);
@@ -976,7 +978,8 @@ u32 FixCiaFile(const char* filename)
         if ((i == 0) && (getbe16(content_list[i].index) == 0)) {
             if ((FileGetData(filename, ncch, 0x600, offset) != 0x600) || (memcmp(ncch->magic, "NCCH", 4) != 0)) {
                 DebugColor(RED, TRANSPARENT, TOP_SCREEN1,"Failed reading NCCH content");
-                return 1;
+                Wait();
+				return 1;
             }
             
             // init metadata with all zeroes
@@ -1017,7 +1020,8 @@ u32 FixCiaFile(const char* filename)
                 u32 offset_exefs = ncch->offset_exefs * 0x200;
                 if (FileGetData(filename, exefs_hdr, 0x200, offset + offset_exefs) != 0x200) {
                     DebugColor(RED, TRANSPARENT, TOP_SCREEN1,"Failed reading NCCH ExeFS content");
-                    return 1;
+                    Wait();
+					return 1;
                 }
                 if (!(ncch->flags[7] & 0x04)) { // encrypted ExeFS
                     info.buffer = exefs_hdr;
@@ -1034,7 +1038,8 @@ u32 FixCiaFile(const char* filename)
                         if (FileGetData(filename, meta->smdh, size_exefs_file,
                             offset + offset_exefs + offset_exefs_file) != size_exefs_file) {
                             DebugColor(RED, TRANSPARENT, TOP_SCREEN1,"Failed reading NCCH ExeFS SMDH");
-                            return 1;
+							Wait();
+							return 1;
                         }
                         if (!(ncch->flags[7] & 0x04)) { // encrypted ExeFS SMDH
                             info.buffer = meta->smdh;
@@ -1050,10 +1055,12 @@ u32 FixCiaFile(const char* filename)
             
             // inject NCCH / exthdr back & append metadata
             if (!FileOpen(filename))
-                return 1;
+                Wait();
+				return 1;
             if (!DebugFileWrite(ncch, 0x400, offset) || !DebugFileWrite(meta, sizeof(CiaMeta), cia.offset_meta)) {
                 FileClose();
-                return 1;
+                Wait();
+				return 1;
             }
             FileClose();
         }
@@ -1061,7 +1068,8 @@ u32 FixCiaFile(const char* filename)
         // (re)calculate hash
         if (GetHashFromFile(filename, offset, size, content_list[i].hash) != 0) {
             DebugColor(RED, TRANSPARENT, TOP_SCREEN1,"Hash recalculation failed!");
-            return 1;
+            Wait();
+			return 1;
         }
     }
     
@@ -1076,10 +1084,12 @@ u32 FixCiaFile(const char* filename)
     
     // inject fixed TMD back to CIA file
     if (!FileOpen(filename))
-        return 1;
+        Wait();
+		return 1;
     if (!DebugFileWrite(tmd, cia.size_tmd, cia.offset_tmd)) {
         FileClose();
-        return 1;
+        Wait();
+		return 1;
     }
     FileClose();
     
@@ -1692,7 +1702,6 @@ u32 DumpCtrGameCart(u32 param)
     
     // verify decrypted ROM
     if ((result == 0) && (param & CD_DECRYPT)) {
-        Debug("");
         if (param & CD_MAKECIA) {
             u32 next_offset = cia.offset_content;
             for (u32 p = 0; p < 3; p++) {
@@ -1716,7 +1725,7 @@ u32 DumpCtrGameCart(u32 param)
                     result = 1;
             }
         }
-        DebugColor((result == 0) ? GREEN : RED, TRANSPARENT, TOP_SCREEN1,"Verification %s", (result == 0) ? "success!" : "failed!");
+        DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Verification %s", (result == 0) ? "success!" : "failed!");
     }
     
     
@@ -1893,14 +1902,13 @@ u32 DumpPrivateHeader(u32 param)
 	DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"%016llX%016llX", getbe64(privateHeader), getbe64(privateHeader + 0x08));
     
     // dump to file
-    snprintf(filename, 64, "/%s%s%.16s-private.bin", GetGameDir() ? GetGameDir() : "",
-        GetGameDir() ? "/" : "", ncch->productcode);
+    snprintf(filename, 64, "/Game3ds/%s.private.bin", ncch->productcode);
     if (FileDumpData(filename, privateHeader, 0x50) != 0x50) {
         DebugColor(RED, TRANSPARENT, TOP_SCREEN1,"Could not create output file on SD");
         Wait();
 		return 1;
     }
-    
+    Wait();
     return 0;
 }
 

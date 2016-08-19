@@ -12,7 +12,7 @@
 typedef struct {
     u32 InitSD;
 	u32 Cart;
-	
+	u32 count;
 	
 } ListMenu;
 

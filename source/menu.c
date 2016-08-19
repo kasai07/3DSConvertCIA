@@ -119,7 +119,7 @@ u32 MenuDumpCart()
 		
 		if (pad_state & BUTTON_A) {
 			
-			
+			Cart.count = 0;
 			if(index == 0)DumpGameCart(CD_DECRYPT | CD_MAKECIA);
 			if(index == 1)DumpGameCart(CD_DECRYPT);
 			if(index == 2)DumpGameCart(CD_DECRYPT | CD_TRIM);
@@ -193,11 +193,12 @@ u32 Menu3DS()
 	
     
 	u32 index = 0;
-   
+	
 	u32 refresh = 0;
 	u32 count = PathMenu3ds();
 	Cart.Cart = 0;
 	Cart.InitSD = 0;
+	
 	DrawMenu(count, index, true, 0, Cart);
    
  // main processing loop
@@ -210,7 +211,7 @@ u32 Menu3DS()
         u32 pad_state = InputWait();
         
 		if (pad_state & BUTTON_A) {
-            
+            Cart.count = 0;
 			Convert3dstoCIA(index);
 			refresh = 1;
 		} else if (pad_state & BUTTON_B) {
@@ -289,11 +290,11 @@ void DrawMenu(u32 count, u32 index, bool DrawTop, u32 menudraw, ListMenu Cart)
 			loadtga(true,false,"Game3ds/menu/button.tga",50,40 + (i*13));
 		}
 		
-		DrawStringFColor(RED  , TRANSPARENT, 120, 10, true, "3DS convert CIA v2.2");
+		DrawStringFColor(RED  , TRANSPARENT, 112, 10, true, "3DS convert CIA v2.2");
 		if(menudraw == 0)DrawStringFColor(GREEN  , TRANSPARENT, 168, 20, true,"Menu 3DS");
 		if(menudraw == 1)DrawStringFColor(GREEN  , TRANSPARENT, 168, 20, true,"Menu CIA");
-		if(menudraw == 2)DrawStringFColor(GREEN  , TRANSPARENT, 136, 20, true,"Menu Dump Cart");
-		if(count == 0)DrawStringFColor(RED  , TRANSPARENT, 132, 120, true,"No Game Found !");
+		if(menudraw == 2)DrawStringFColor(GREEN  , TRANSPARENT, 144, 20, true,"Menu Dump Cart");
+		if(count == 0)DrawStringFColor(RED  , TRANSPARENT, 140, 120, true,"No Game Found !");
 		
 		
 	//--------------------bottom-------------
@@ -354,7 +355,6 @@ void DrawMenu(u32 count, u32 index, bool DrawTop, u32 menudraw, ListMenu Cart)
 		}
 	} else {
 		
-		//--------------------top----------------
 		for (u32 i = 0; i < count; i++) {
 			
 			char* name = c[i];

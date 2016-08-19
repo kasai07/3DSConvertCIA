@@ -1626,7 +1626,8 @@ ListGame listgame[] = {
 			 {"The Legend Of Zelda Majoras Mask 3D","CTR-AJRE",0x00125500},
 			 {"Grandpa Carls Flying House 3D","CTR-MBXJ",0x00162C00},
 			 {"Sugar Rush 3D","CTR-MBTJ",0x00164900},
-			 {"Flap Flap","CTR-BFFP",0x00154900}
+			 {"Flap Flap","CTR-BFFP",0x00154900},
+			 {"No Name","CTR-AAAA",0x00154900}
 };
 
 u32 titlescreen()
@@ -1652,7 +1653,7 @@ u32 titlescreen()
 	{
 		u32 ID;
 		int i = 0;
-		for(i = 0; i < 1618; i++)
+		for(i = 0; i < 1619; i++)
 		{
 			ID = (0x00000000 + ncch->partitionId);
 			
