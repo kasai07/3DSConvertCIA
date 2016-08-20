@@ -597,8 +597,7 @@ void ShowProgress(u64 current, u64 total)
 	}
 	}
 	
-	if(prog == 20)	Screenshot(NULL);
-	if(prog == 21)	Screenshot(NULL);
+
 	if(Cart.count == 0)	
 	{
 		int barredir = 0;
