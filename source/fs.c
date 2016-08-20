@@ -17,6 +17,37 @@ static FATFS fs;
 static FIL file;
 static DIR dir;
 
+u32 drawimage(char*data, int posX, int posY,int tailleX, int tailleY)
+{
+	u8 r,g,b,a;
+	int dir = 0;
+	for(int i = tailleY; 0 < i; i--)
+	{	 
+		
+		for(int j = 0; j < tailleX; j++)	
+		{
+			
+			b = (data[dir++]);
+			g = (data[dir++]);
+			r = (data[dir++]);
+			a = (data[dir++]);
+			
+			if(a == 0x00)
+			{
+				ui32 passe = (HEIGHT * posX+j + HEIGHT - posY+i ) * BPP;
+				*((ui8*)TOP_SCREEN0 + passe++);
+				*((ui8*)TOP_SCREEN0 + passe++);
+				*((ui8*)TOP_SCREEN0 + passe++);
+				
+				
+			}else
+			{
+				SET_PIXEL(TOP_SCREEN0, (posX+j), (posY+i), RGBCOLOR(r,g,b));
+			}
+		}			
+	}
+}
+
 /* Volume - Partition resolution table (default table) */
 u32 InitKeys()
 {
@@ -565,6 +596,9 @@ void ShowProgress(u64 current, u64 total)
 		}			
 	}
 	}
+	
+	if(prog == 20)	Screenshot(NULL);
+	if(prog == 21)	Screenshot(NULL);
 	if(Cart.count == 0)	
 	{
 		int barredir = 0;
@@ -590,6 +624,7 @@ void ShowProgress(u64 current, u64 total)
     } else {
 		DrawString(TOP_SCREEN0, "    ", 184, 230, WHITE, BLACK);
         DrawString(TOP_SCREEN1, "    ", 184, 230, WHITE, BLACK);
+		Cart.count = 0;
 	}
 
 }

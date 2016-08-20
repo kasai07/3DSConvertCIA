@@ -955,14 +955,12 @@ u32 FixCiaFile(const char* filename)
     // fetch CIA info, Ticket, TMD, content_list
     if ((FileGetData(filename, buffer, 0x4000, 0) != 0x4000) || (memcmp(buffer, "\x20\x20", 2) != 0)) {
         DebugColor(RED, TRANSPARENT, TOP_SCREEN1,"This does not look like a CIA file"); // checking an arbitrary size here
-		Wait();
 		return 1;
     }
     GetCiaInfo(&cia, (CiaHeader*) buffer);
     if (cia.offset_content > 0x4000) {
         DebugColor(RED, TRANSPARENT, TOP_SCREEN1,"CIA stub has bad size (%lu)", cia.offset_content);
-        Wait();
-		return 1;
+       return 1;
     }
     TitleMetaData* tmd = (TitleMetaData*) (buffer + cia.offset_tmd);
     TmdContentChunk* content_list = (TmdContentChunk*) (tmd + 1);
@@ -978,8 +976,7 @@ u32 FixCiaFile(const char* filename)
         if ((i == 0) && (getbe16(content_list[i].index) == 0)) {
             if ((FileGetData(filename, ncch, 0x600, offset) != 0x600) || (memcmp(ncch->magic, "NCCH", 4) != 0)) {
                 DebugColor(RED, TRANSPARENT, TOP_SCREEN1,"Failed reading NCCH content");
-                Wait();
-				return 1;
+                return 1;
             }
             
             // init metadata with all zeroes
@@ -1020,8 +1017,7 @@ u32 FixCiaFile(const char* filename)
                 u32 offset_exefs = ncch->offset_exefs * 0x200;
                 if (FileGetData(filename, exefs_hdr, 0x200, offset + offset_exefs) != 0x200) {
                     DebugColor(RED, TRANSPARENT, TOP_SCREEN1,"Failed reading NCCH ExeFS content");
-                    Wait();
-					return 1;
+                    return 1;
                 }
                 if (!(ncch->flags[7] & 0x04)) { // encrypted ExeFS
                     info.buffer = exefs_hdr;
@@ -1038,7 +1034,6 @@ u32 FixCiaFile(const char* filename)
                         if (FileGetData(filename, meta->smdh, size_exefs_file,
                             offset + offset_exefs + offset_exefs_file) != size_exefs_file) {
                             DebugColor(RED, TRANSPARENT, TOP_SCREEN1,"Failed reading NCCH ExeFS SMDH");
-							Wait();
 							return 1;
                         }
                         if (!(ncch->flags[7] & 0x04)) { // encrypted ExeFS SMDH
@@ -1055,11 +1050,10 @@ u32 FixCiaFile(const char* filename)
             
             // inject NCCH / exthdr back & append metadata
             if (!FileOpen(filename))
-                Wait();
 				return 1;
             if (!DebugFileWrite(ncch, 0x400, offset) || !DebugFileWrite(meta, sizeof(CiaMeta), cia.offset_meta)) {
                 FileClose();
-                Wait();
+                
 				return 1;
             }
             FileClose();
@@ -1068,8 +1062,7 @@ u32 FixCiaFile(const char* filename)
         // (re)calculate hash
         if (GetHashFromFile(filename, offset, size, content_list[i].hash) != 0) {
             DebugColor(RED, TRANSPARENT, TOP_SCREEN1,"Hash recalculation failed!");
-            Wait();
-			return 1;
+            return 1;
         }
     }
     
@@ -1084,11 +1077,11 @@ u32 FixCiaFile(const char* filename)
     
     // inject fixed TMD back to CIA file
     if (!FileOpen(filename))
-        Wait();
+        
 		return 1;
     if (!DebugFileWrite(tmd, cia.size_tmd, cia.offset_tmd)) {
         FileClose();
-        Wait();
+        
 		return 1;
     }
     FileClose();
@@ -1934,7 +1927,7 @@ u32 Convert3dstoCIA(u32 index)
     
     
     snprintf(pathjeu, 60, "%S/",PATH3DS);
-	while (DirRead(pathjeu, 30)) {
+	while (DirRead(pathjeu, 50)) {
         u8 header[0x200];
         snprintf(pathjeu, 60, "%s/%s%s",PATH3DS,c[index],EXT3DS);
 		if (FileGetData(pathjeu, header, 0x200, 0x0) != 0x200)
@@ -2045,7 +2038,7 @@ u32 Convert3dstoCIA(u32 index)
     
     if (!n_failed) {
         
-		DrawStringFColor(RED, TRANSPARENT, 95, 85, true, "Nothing found");
+		DrawStringFColor(RED, TRANSPARENT, 95, 85, true, "Game no found !");
 		Wait();
     }
     

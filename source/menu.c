@@ -8,6 +8,10 @@
 #include "pathmenu.h"
 #include "game.h"
 #include "title.h"
+#include "titre.h"
+#include "menu3ds.h"
+#include "menucia.h"
+#include "menudumpcart.h"
 
 char* menulist[] = {
 "Dump Cart to CIA",
@@ -50,7 +54,9 @@ u32 MenuCIA()
 				refresh = 1;
 			}
 			
-		} else if (pad_state & BUTTON_B) {
+		} else if (pad_state & BUTTON_Y) {
+            Screenshot(NULL);
+        } else if (pad_state & BUTTON_B) {
             
 			refresh = 1;
 			Cart.InitSD = 1;
@@ -136,7 +142,9 @@ u32 MenuDumpCart()
 			Cart.Cart = 1;
 			Cart.InitSD = 1;
 			
-		} else if (pad_state & BUTTON_R1) {
+		} else if (pad_state & BUTTON_Y) {
+            Screenshot(NULL);
+        } else if (pad_state & BUTTON_R1) {
 		 
 			Menu3DS();
 			
@@ -239,7 +247,9 @@ u32 Menu3DS()
 			MenuDumpCart();
 			refresh = 1;
 			
-		}  else if (pad_state & BUTTON_X) {
+		}  else if (pad_state & BUTTON_Y) {
+            Screenshot(NULL);
+        } else if (pad_state & BUTTON_X) {
             
 			if(count != 0)
 			{
@@ -287,13 +297,12 @@ void DrawMenu(u32 count, u32 index, bool DrawTop, u32 menudraw, ListMenu Cart)
 	
 		for (u32 i = 0; i < count; i++) 
 		{
-			loadtga(true,false,"Game3ds/menu/button.tga",50,40 + (i*13));
+			loadtga(true,false,"Game3ds/menu/button.tga",50,50 + (i*13));
 		}
-		
-		DrawStringFColor(RED  , TRANSPARENT, 112, 10, true, "3DS convert CIA v2.2");
-		if(menudraw == 0)DrawStringFColor(GREEN  , TRANSPARENT, 168, 20, true,"Menu 3DS");
-		if(menudraw == 1)DrawStringFColor(GREEN  , TRANSPARENT, 168, 20, true,"Menu CIA");
-		if(menudraw == 2)DrawStringFColor(GREEN  , TRANSPARENT, 144, 20, true,"Menu Dump Cart");
+		drawimage(titre, 107, 5, 185, 20);//titre
+		if(menudraw == 0)drawimage(menu3ds, 162, 30, 75, 14);//menu 3ds
+		if(menudraw == 1)drawimage(menucia, 165, 30, 81, 14);//menu cia
+		if(menudraw == 2)drawimage(menudumpcart, 132, 30, 135, 17);//menu dump crat
 		if(count == 0)DrawStringFColor(RED  , TRANSPARENT, 140, 120, true,"No Game Found !");
 		
 		
@@ -308,7 +317,7 @@ void DrawMenu(u32 count, u32 index, bool DrawTop, u32 menudraw, ListMenu Cart)
 	if(Cart.InitSD == 1)InitFS();
 	DrawStringFColor(WHITE, TRANSPARENT, 20, 50, false, "START:Poweroff");
 	DrawStringFColor(WHITE, TRANSPARENT, 20, 60, false, "SELECT:Reboot");
-	
+	DrawStringFColor(WHITE, TRANSPARENT, 20, 120, false, "Y : SreenShot");
 	if(menudraw == 0)
     {
 		DrawStringFColor(GREEN, TRANSPARENT, 20, 80, false, "A : Convert");
@@ -348,10 +357,10 @@ void DrawMenu(u32 count, u32 index, bool DrawTop, u32 menudraw, ListMenu Cart)
 			char* name = menulist[i];
 			
 			if(i != index)
-			DrawStringFColor(WHITE, TRANSPARENT, 200 - (((paramdump[i] * 8) / 2) + 8), 40 + (i*13 + 2), true, " %s ", name);
+			DrawStringFColor(WHITE, TRANSPARENT, 200 - (((paramdump[i] * 8) / 2) + 8), 50 + (i*13 + 2), true, " %s ", name);
 			
 			if(i == index)
-			DrawStringFColor(SELECT, TRANSPARENT, 200 - (((paramdump[i] * 8) / 2) + 8), 40 + (i*13 + 2), true, " %s ", name);
+			DrawStringFColor(SELECT, TRANSPARENT, 200 - (((paramdump[i] * 8) / 2) + 8), 50 + (i*13 + 2), true, " %s ", name);
 		}
 	} else {
 		
@@ -360,10 +369,10 @@ void DrawMenu(u32 count, u32 index, bool DrawTop, u32 menudraw, ListMenu Cart)
 			char* name = c[i];
 			
 			if(i != index)
-			DrawStringFColor(WHITE, TRANSPARENT, 200 - (((compteur[i] * 8) / 2) + 8), 40 + (i*13 + 2), true, " %s ", name);
+			DrawStringFColor(WHITE, TRANSPARENT, 200 - (((compteur[i] * 8) / 2) + 8), 50 + (i*13 + 2), true, " %s ", name);
 			
 			if(i == index)
-			DrawStringFColor(SELECT, TRANSPARENT, 200 - (((compteur[i] * 8) / 2) + 8), 40 + (i*13 + 2), true, " %s ", name);
+			DrawStringFColor(SELECT, TRANSPARENT, 200 - (((compteur[i] * 8) / 2) + 8), 50 + (i*13 + 2), true, " %s ", name);
 			
 		}
 	}

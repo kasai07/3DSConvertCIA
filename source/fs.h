@@ -9,7 +9,7 @@
 
 u32 Wait();
 u32 cartpresent();
-
+u32 drawimage(char* data, int posX, int posY,int tailleX, int tailleY);
 u32 InitKeys();
 
 bool InitFS();

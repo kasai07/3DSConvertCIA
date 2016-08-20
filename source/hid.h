@@ -1,5 +1,6 @@
 #pragma once
 
+
 #include "common.h"
 
 #define HID_STATE (*(volatile u32*)0x10146000)

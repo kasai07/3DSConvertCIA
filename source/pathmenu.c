@@ -16,7 +16,7 @@ u32 PathMenu3ds(const char *path)
 	u32 j = 0;
 	int countpay = 0;
 	
-	for(int i = 0; i < 30; i++)
+	for(int i = 0; i < 50; i++)
 	{	
 		c[i][0] = 0;
 	}
