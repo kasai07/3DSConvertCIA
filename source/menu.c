@@ -357,25 +357,42 @@ void DrawMenu(u32 count, u32 index, bool DrawTop, u32 menudraw, ListMenu Cart)
 			char* name = menulist[i];
 			
 			if(i != index)
-			DrawStringFColor(WHITE, TRANSPARENT, 200 - (((paramdump[i] * 8) / 2) + 8), 50 + (i*13 + 2), true, " %s ", name);
+			DrawStringFColor(WHITE, TRANSPARENT, 200 - ((paramdump[i] * 8) / 2), 50 + (i*13 + 2), true, "%s", name);
 			
 			if(i == index)
-			DrawStringFColor(SELECT, TRANSPARENT, 200 - (((paramdump[i] * 8) / 2) + 8), 50 + (i*13 + 2), true, " %s ", name);
+			DrawStringFColor(SELECT, TRANSPARENT, 200 - ((paramdump[i] * 8) / 2), 50 + (i*13 + 2), true, "%s", name);
 		}
+		
 	} else {
+		
 		
 		for (u32 i = 0; i < count; i++) {
 			
-			char* name = c[i];
 			
 			if(i != index)
-			DrawStringFColor(WHITE, TRANSPARENT, 200 - (((compteur[i] * 8) / 2) + 8), 50 + (i*13 + 2), true, " %s ", name);
-			
+			{
+				if(compteur[i] >= 32)
+				{
+					char name[33];
+					snprintf(name, 32, "%s",c[i]);
+					DrawStringFColor(WHITE, TRANSPARENT, 200 - ((34 * 8) / 2), 50 + (i*13 + 2), true, "%s...", name);
+				} else {
+					DrawStringFColor(WHITE, TRANSPARENT, 200 - ((compteur[i] * 8) / 2), 50 + (i*13 + 2), true, "%s", c[i]);
+				}
+			}
 			if(i == index)
-			DrawStringFColor(SELECT, TRANSPARENT, 200 - (((compteur[i] * 8) / 2) + 8), 50 + (i*13 + 2), true, " %s ", name);
-			
+			{
+				if(compteur[i] >= 32)
+				{
+					char name[33];
+					snprintf(name, 32, "%s",c[i]);
+					DrawStringFColor(SELECT, TRANSPARENT, 200 - ((34 * 8) / 2), 50 + (i*13 + 2), true, "%s...", name);
+				} else {
+					DrawStringFColor(SELECT, TRANSPARENT, 200 - ((compteur[i] * 8) / 2), 50 + (i*13 + 2), true, "%s", c[i]);
+				}
+			}
 		}
 	}
-	//---------------------------------------
 }
 
+	

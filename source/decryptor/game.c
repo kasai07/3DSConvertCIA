@@ -1939,9 +1939,12 @@ u32 Convert3dstoCIA(u32 index)
         
         n_failed++; // this will be set back upon completion;
         DrawStringFColor(WHITE, TRANSPARENT, 95, 65, true, "Converting to CIA:");
-		DrawStringFColor(WHITE, TRANSPARENT, 95, 75, true, "%s", c[index]);
-		
-        
+		if(compteur[index] >= 23)
+		{	char name[23];
+			snprintf(name, 23, "%s",c[index]);
+			DrawStringFColor(WHITE, TRANSPARENT, 95, 75, true, "%s...",name);
+		}else{DrawStringFColor(WHITE, TRANSPARENT, 95, 75, true, "%s",c[index]);}
+			
         // build the CIA stub
         u32 stub_size = BuildCiaStub(stub, header);
         if (stub_size == 0) {

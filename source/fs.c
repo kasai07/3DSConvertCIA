@@ -524,8 +524,6 @@ size_t FileCopyTo(const char* dest, void* buf, size_t bufsize)
 
 u32 DeleteFileGame(u32 index, u32 extension)
 {
-	
-	
 	char path[60];
     
 	snprintf(path, 60, "Game3ds/menu/topbg.tga");
@@ -534,10 +532,20 @@ u32 DeleteFileGame(u32 index, u32 extension)
 	loadtga(true,false,path,75,45);
 	
 	DrawStringFColor(WHITE, TRANSPARENT, 95, 80, true, "Delete the game !");
-	DrawStringFColor(WHITE, TRANSPARENT, 95, 90, true, "%s",c[index]);
+	
+	
+	if(compteur[index] >= 23)
+	{	
+		char name[23];
+		snprintf(name, 23, "%s",c[index]);
+		DrawStringFColor(WHITE, TRANSPARENT, 95, 90, true, "%s...",name);
+		
+	}else{DrawStringFColor(WHITE, TRANSPARENT, 95, 90, true, "%s",c[index]);}
+	
 	DrawStringFColor(WHITE, TRANSPARENT, 95, 100, true, " ");
 	DrawStringFColor(WHITE, TRANSPARENT, 95, 110, true, "A : Delete");
 	DrawStringFColor(WHITE, TRANSPARENT, 95, 120, true, "B : Return");
+	
 	if(extension == 0)
 	{
 		snprintf(path, 60, "Game3ds/3ds/%s.3ds",c[index]);
@@ -549,26 +557,23 @@ u32 DeleteFileGame(u32 index, u32 extension)
 	
 	while (true) 
 	{
-    
-    u32 pad_state = InputWait();
-    
-	if (pad_state & BUTTON_A) 
-	{
-        
-		f_unlink(path);
-		return 0;
 		
-	} else if (pad_state & BUTTON_B) {
-      
-		return 0;
+		u32 pad_state = InputWait();
 		
-	} 
+		if (pad_state & BUTTON_A) 
+		{
+			
+			f_unlink(path);
+			return 0;
+			
+		} else if (pad_state & BUTTON_B) {
+		  
+			return 0;
+			
+		} 
 	}
 
 }
-
-
-
 
 #if !defined(ALT_PROGRESS)
 void ShowProgress(u64 current, u64 total)
@@ -581,20 +586,20 @@ void ShowProgress(u64 current, u64 total)
 	u8 r,g,b;
 	for(int f = 0; f < prog; f++)
 	{
-	int jaugedir = 0;
-	for(int i = 10; 0 < i; i--)
-	{	 
-		
-		for(int j = 0; j < 2; j++)	
-		{
+		int jaugedir = 0;
+		for(int i = 10; 0 < i; i--)
+		{	 
 			
-			b = (jauge[jaugedir++]);
-			g = (jauge[jaugedir++]);
-			r = (jauge[jaugedir++]);
-			SET_PIXEL(TOP_SCREEN0, (100 + (f * 2) + j), (213+i), RGBCOLOR(r,g,b));
-			
-		}			
-	}
+			for(int j = 0; j < 2; j++)	
+			{
+				
+				b = (jauge[jaugedir++]);
+				g = (jauge[jaugedir++]);
+				r = (jauge[jaugedir++]);
+				SET_PIXEL(TOP_SCREEN0, (100 + (f * 2) + j), (213+i), RGBCOLOR(r,g,b));
+				
+			}			
+		}
 	}
 	
 
