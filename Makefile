@@ -18,9 +18,9 @@ include $(DEVKITARM)/ds_rules
 #---------------------------------------------------------------------------------
 export TARGET	:=	up_3DSconvertCIA
 BUILD		:=	build
-SOURCES		:=	source source/fatfs source/abstraction source/payload source/tga source/decryptor source/gamecart
+SOURCES		:=	source source/fatfs source/abstraction source/payload source/tga source/decryptor source/gamecart source/images
 DATA		:=	data
-INCLUDES	:=	source source/fatfs source/payload source/tga source/decryptor source/decryptor source/gamecart
+INCLUDES	:=	source source/fatfs source/payload source/tga source/decryptor source/decryptor source/gamecart source/images
 
 #---------------------------------------------------------------------------------
 # THEME: if set to anything, name of the themes file folder inside resources

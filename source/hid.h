@@ -18,5 +18,6 @@
 #define BUTTON_X      		(1 << 10) 	//0x00000400
 #define BUTTON_Y      		(1 << 11) 	//0x00000800
 #define BUTTON_ANY    		0x00000FFF
+#define BUTTON_ARROW  (BUTTON_RIGHT|BUTTON_LEFT|BUTTON_UP|BUTTON_DOWN)
 
 u32 InputWait();

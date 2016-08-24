@@ -17,7 +17,7 @@
 #include "pathmenu.h"
 #include "fatfs/ff.h"
 #include "tga.h"
-
+#include "title.h"
 
 #define CART_CHUNK_SIZE (u32) (1*1024*1024)
 
@@ -1558,7 +1558,12 @@ u32 DumpCtrGameCart(u32 param)
     }
     
     // output some info
-    DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Product ID: %.16s", ncch->productcode);
+   
+	
+	char name[26];
+	snprintf(name, 27, "%s",cartename.name);
+	DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Game Name: %s...", name);
+	DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Product ID: %.16s", ncch->productcode);
     DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Cartridge data size: %lluMB", cart_size / 0x100000);
     DebugColor(WHITE, TRANSPARENT, TOP_SCREEN1,"Cartridge used size: %lluMB", data_size / 0x100000);
     if (data_size > cart_size) {
@@ -1607,11 +1612,11 @@ u32 DumpCtrGameCart(u32 param)
     // create file, write CIA / NCSD header
     if (param & CD_MAKECIA) { 
         
-		snprintf(filename, 64, "/Game3ds/cia/%s.cia",ncch->productcode);
+		snprintf(filename, 64, "/Game3ds/cia/%s.cia",cartename.name);
     
 	} else {
 		
-		snprintf(filename, 64, "/Game3ds/3ds/%s.3ds",ncch->productcode);
+		snprintf(filename, 64, "/Game3ds/3ds/%s.3ds",cartename.name);
     }
     
 	

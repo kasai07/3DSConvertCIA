@@ -1647,7 +1647,7 @@ u32 titlescreen()
 		
 		Cart.Cart = 0;
 		
-	}
+	
 	
 	if(cartId & 0x10000000)
 	{
@@ -1661,7 +1661,10 @@ u32 titlescreen()
 			
 		}
 		DrawStringFColor(GREEN, TRANSPARENT, 5, 220,true,"Product ID: %.16s", ncch->productcode);
-		DrawStringFColor(GREEN  , TRANSPARENT, 5, 230, true,"%s",listgame[i].name);
+		cartename.name = listgame[i].name;
+		char name[44];
+		snprintf(name, 45, "%s",cartename.name);
+		DrawStringFColor(GREEN  , TRANSPARENT, 5, 230, true,"%s",name);
 		
 	} else if(!(cartId & 0x10000000)){
 		
@@ -1681,6 +1684,7 @@ u32 titlescreen()
 			memcpy (name, &buff[0x0C], 4 + 2);
 			DrawStringFColor(GREEN, TRANSPARENT, 5, 220,true,"Product ID: %s", name);
 		}
+	}
 	}
 }
 

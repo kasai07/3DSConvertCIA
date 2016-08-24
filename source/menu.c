@@ -12,6 +12,8 @@
 #include "menu3ds.h"
 #include "menucia.h"
 #include "menudumpcart.h"
+#include "button.h"
+
 
 char* menulist[] = {
 "Dump Cart to CIA",
@@ -54,22 +56,20 @@ u32 MenuCIA()
 				refresh = 1;
 			}
 			
-		} else if (pad_state & BUTTON_Y) {
-            Screenshot(NULL);
-        } else if (pad_state & BUTTON_B) {
+		} else if (pad_state & BUTTON_B) {
             
 			refresh = 1;
 			Cart.InitSD = 1;
 			
-		}  else if (pad_state & BUTTON_R1) {
+		} else if (pad_state & BUTTON_R1) {
             
 			MenuDumpCart();
 			
-		}  else if (pad_state & BUTTON_L1) {
+		} else if (pad_state & BUTTON_L1) {
             
 			Menu3DS();
 			
-		}  else if (pad_state & BUTTON_DOWN) {
+		} else if (pad_state & BUTTON_DOWN) {
            
 		   index = (index == count - 1) ? 0 : index + 1;
            DrawTop = false;
@@ -142,9 +142,7 @@ u32 MenuDumpCart()
 			Cart.Cart = 1;
 			Cart.InitSD = 1;
 			
-		} else if (pad_state & BUTTON_Y) {
-            Screenshot(NULL);
-        } else if (pad_state & BUTTON_R1) {
+		} else if (pad_state & BUTTON_R1) {
 		 
 			Menu3DS();
 			
@@ -227,7 +225,7 @@ u32 Menu3DS()
 			refresh = 1;
 			Cart.InitSD = 1;
 			
-		}  else if (pad_state & BUTTON_DOWN) {
+		} else if (pad_state & BUTTON_DOWN) {
            
 		   index = (index == count - 1) ? 0 : index + 1;
            DrawTop = false;
@@ -242,14 +240,12 @@ u32 Menu3DS()
 			MenuCIA();
 			refresh = 1;
 			
-		}  else if (pad_state & BUTTON_L1) {
+		} else if (pad_state & BUTTON_L1) {
             
 			MenuDumpCart();
 			refresh = 1;
 			
-		}  else if (pad_state & BUTTON_Y) {
-            Screenshot(NULL);
-        } else if (pad_state & BUTTON_X) {
+		} else if (pad_state & BUTTON_X) {
             
 			if(count != 0)
 			{
@@ -294,16 +290,19 @@ void DrawMenu(u32 count, u32 index, bool DrawTop, u32 menudraw, ListMenu Cart)
 		
 		snprintf(pathtga, 60, "Game3ds/menu/topbg.tga");
 		loadtga(true,false,pathtga,0,0);
-	
-		for (u32 i = 0; i < count; i++) 
+		if(menudraw == 2)
 		{
-			loadtga(true,false,"Game3ds/menu/button.tga",50,50 + (i*13));
+			
+			for (u32 i = 0; i < count; i++) 
+			{
+				drawimage(button, 25, 50 + (i*13), 350, 11);//button
+			}
 		}
 		drawimage(titre, 107, 5, 185, 20);//titre
 		if(menudraw == 0)drawimage(menu3ds, 162, 30, 75, 14);//menu 3ds
 		if(menudraw == 1)drawimage(menucia, 165, 30, 81, 14);//menu cia
 		if(menudraw == 2)drawimage(menudumpcart, 132, 30, 135, 17);//menu dump crat
-		if(count == 0)DrawStringFColor(RED  , TRANSPARENT, 140, 120, true,"No Game Found !");
+		if(count == 0)DrawStringFColor(RED  , TRANSPARENT, 200 - ((16 * 8) / 2), 120, true,"Game Not Found !");
 		
 		
 	//--------------------bottom-------------
@@ -317,7 +316,6 @@ void DrawMenu(u32 count, u32 index, bool DrawTop, u32 menudraw, ListMenu Cart)
 	if(Cart.InitSD == 1)InitFS();
 	DrawStringFColor(WHITE, TRANSPARENT, 20, 50, false, "START:Poweroff");
 	DrawStringFColor(WHITE, TRANSPARENT, 20, 60, false, "SELECT:Reboot");
-	DrawStringFColor(WHITE, TRANSPARENT, 20, 120, false, "Y : SreenShot");
 	if(menudraw == 0)
     {
 		DrawStringFColor(GREEN, TRANSPARENT, 20, 80, false, "A : Convert");
@@ -365,32 +363,43 @@ void DrawMenu(u32 count, u32 index, bool DrawTop, u32 menudraw, ListMenu Cart)
 		
 	} else {
 		
+		menupos.pos = 0;
 		
-		for (u32 i = 0; i < count; i++) {
+		for (u32 i = 0; i < count; i++) 
+		{
 			
-			
-			if(i != index)
+			drawimage(button, 25, 50 + (i*13), 350, 11);//button
+			if(i >= 12)break;
+		}
+		
+		if(index >= 12)menupos.pos = (index - 12);
+		
+		for (u32 i = 0; i < count; i++) 
+		{
+			if(menupos.pos != index)
 			{
-				if(compteur[i] >= 32)
+				if(compteur[menupos.pos] >= 37)
 				{
-					char name[33];
-					snprintf(name, 32, "%s",c[i]);
-					DrawStringFColor(WHITE, TRANSPARENT, 200 - ((34 * 8) / 2), 50 + (i*13 + 2), true, "%s...", name);
+					char name[38];
+					snprintf(name, 37, "%s",c[menupos.pos]);
+					DrawStringFColor(WHITE, TRANSPARENT, 200 - ((39 * 8) / 2), 50 + (i*13 + 2), true, "%s...", name);
 				} else {
-					DrawStringFColor(WHITE, TRANSPARENT, 200 - ((compteur[i] * 8) / 2), 50 + (i*13 + 2), true, "%s", c[i]);
+					DrawStringFColor(WHITE, TRANSPARENT, 200 - ((compteur[menupos.pos] * 8) / 2), 50 + (i*13 + 2), true, "%s", c[menupos.pos]);
 				}
 			}
-			if(i == index)
+			if(menupos.pos == index)
 			{
-				if(compteur[i] >= 32)
+				if(compteur[menupos.pos] >= 37)
 				{
-					char name[33];
-					snprintf(name, 32, "%s",c[i]);
-					DrawStringFColor(SELECT, TRANSPARENT, 200 - ((34 * 8) / 2), 50 + (i*13 + 2), true, "%s...", name);
+					char name[38];
+					snprintf(name, 37, "%s",c[menupos.pos]);
+					DrawStringFColor(SELECT, TRANSPARENT, 200 - ((39 * 8) / 2), 50 + (i*13 + 2), true, "%s...", name);
 				} else {
-					DrawStringFColor(SELECT, TRANSPARENT, 200 - ((compteur[i] * 8) / 2), 50 + (i*13 + 2), true, "%s", c[i]);
+					DrawStringFColor(SELECT, TRANSPARENT, 200 - ((compteur[menupos.pos] * 8) / 2), 50 + (i*13 + 2), true, "%s", c[menupos.pos]);
 				}
 			}
+			menupos.pos++;
+			if(i >= 12)break;
 		}
 	}
 }
