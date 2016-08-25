@@ -363,8 +363,6 @@ void DrawMenu(u32 count, u32 index, bool DrawTop, u32 menudraw, ListMenu Cart)
 		
 	} else {
 		
-		menupos.pos = 0;
-		
 		for (u32 i = 0; i < count; i++) 
 		{
 			
@@ -372,7 +370,16 @@ void DrawMenu(u32 count, u32 index, bool DrawTop, u32 menudraw, ListMenu Cart)
 			if(i >= 12)break;
 		}
 		
-		if(index >= 12)menupos.pos = (index - 12);
+		if(index == 0)menupos.pos2 = 0;	
+		if(count > 12)
+		{
+			if((menupos.pos2 + 12) < index)menupos.pos2++;
+			if((menupos.pos2 + 12) > count){menupos.pos2 = (count - 12);}
+			if(menupos.pos2 > index)menupos.pos2--;
+			if(index == count - 1)menupos.pos2 = count - 13;
+		}
+		menupos.pos = menupos.pos2;
+	
 		
 		for (u32 i = 0; i < count; i++) 
 		{
