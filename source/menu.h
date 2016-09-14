@@ -11,7 +11,6 @@
 
 typedef struct {
     
-	u32 InitSD;
 	u32 Cart;
 	u32 count;
 	
@@ -23,10 +22,10 @@ typedef struct {
    
 	u32 pos;
 	u32 pos2;
+	
 } Menu;
 
 Menu menupos;
 
 u32 Menu3DS();
-
 

@@ -78,7 +78,8 @@ bool i2cSelectRegister(u8 bus_id, u8 reg) {
 //-----------------------------------------------------------------------------
 
 u8 i2cReadRegister(u8 dev_id, u8 reg) {
-    u8 bus_id = i2cGetDeviceBusId(dev_id);
+   
+	u8 bus_id = i2cGetDeviceBusId(dev_id);
     u8 dev_addr = i2cGetDeviceRegAddr(dev_id);
 
     for (size_t i = 0; i < 8; i++) {

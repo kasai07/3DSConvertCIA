@@ -153,13 +153,18 @@ void Screenshot(const char* path)
     }
     
     memset(buffer, 0x1F, 400 * 240 * 3 * 2);
-    for (u32 x = 0; x < 400; x++)
-        for (u32 y = 0; y < 240; y++)
+   
+ for (u32 x = 0; x < 400; x++)
+        
+		for (u32 y = 0; y < 240; y++)
             memcpy(buffer_t + (y*400 + x) * 3, TOP_SCREEN0 + (x*240 + y) * 3, 3);
-    for (u32 x = 0; x < 320; x++)
-        for (u32 y = 0; y < 240; y++)
+   
+ for (u32 x = 0; x < 320; x++)
+       
+ for (u32 y = 0; y < 240; y++)
             memcpy(buffer + (y*400 + x + 40) * 3, BOT_SCREEN0 + (x*240 + y) * 3, 3);
-    FileWrite(bmp_header, 54, 0);
+   
+ FileWrite(bmp_header, 54, 0);
     FileWrite(buffer, 400 * 240 * 3 * 2, 54);
     FileClose();
 }
@@ -254,4 +259,16 @@ void loadSplash(){
 		}
         u64 i = 0xFFFFFF; while(--i) __asm("mov r0, r0"); //Less Ghetto sleep func
     
+}
+
+u32 dumpram()
+{
+
+	
+	char bin[8];
+	snprintf(bin, 8, "ram.bin");
+	FileCreate(bin, true);
+	FileWrite((u8*) 0x28000000, 0x4000000,0);
+    FileWrite((u8*) 0x32000000, 0x4000000,0x4000000);
+    FileClose();
 }

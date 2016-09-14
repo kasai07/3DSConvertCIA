@@ -41,6 +41,7 @@
 #define BUFFER_ADDRESS  ((u8*) 0x21000000)
 #define BUFFER_MAX_SIZE ((u32) (1 * 1024 * 1024))
 
+
 static inline u32 strchrcount(const char* str, char symbol) {
     u32 count = 0;
     for (u32 i = 0; str[i] != '\0'; i++) {

@@ -13,6 +13,7 @@
 
 #define I2C_DEV_MCU  3
 #define I2C_DEV_GYRO 10
+#define I2C_DEV_DEBUGPAD 12
 #define I2C_DEV_IR   13
 
 u8 i2cGetDeviceBusId(u8 device_id);

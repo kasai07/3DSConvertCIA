@@ -877,12 +877,22 @@ u32 BuildCiaStub(u8* stub, u8* ncchncsd)
     };
     u8* cert = (u8*) (stub + cia.offset_cert);
     u8* cert_db = (u8*) 0x20400000; // should be okay to use this area
-    PartitionInfo* p_ctrnand = GetPartitionInfo(P_CTRNAND);
+    
+	PartitionInfo* p_ctrnand;
+	p_ctrnand = GetPartitionInfo(P_CTRNAND);
     u32 offset_db, size_db;
-    if ((SeekFileInNand(&offset_db, &size_db, "DBS        CERTS   DB ", p_ctrnand) != 0) || (size_db != 0x6000)){
-        DebugColor(RED, TRANSPARENT, TOP_SCREEN1,"certs.db not found or bad size");
-        return 1;
-    }
+    
+	if ((SeekFileInNand(&offset_db, &size_db, "DBS        CERTS   DB ", p_ctrnand) != 0) || (size_db != 0x6000)){
+		
+		p_ctrnand = GetPartitionInfo(N_EMUNAND | P_CTRNAND);
+		
+		if ((SeekFileInNand(&offset_db, &size_db, "DBS        CERTS   DB ", p_ctrnand) != 0) || (size_db != 0x6000)){
+			DebugColor(RED, TRANSPARENT, TOP_SCREEN1,"certs.db not found or bad size");
+			return 1;
+		}
+		
+	} 
+	
     if (DecryptNandToMem(cert_db, offset_db, size_db, p_ctrnand) != 0)
         return 0;
     memcpy(cert + 0x000, cert_db + 0x0C10, 0x1F0);
@@ -1625,7 +1635,12 @@ u32 DumpCtrGameCart(u32 param)
         Wait();
 		return 1;
     }
-    if (param & CD_MAKECIA) { // CIA stub, including header, cert, ticket, TMD
+    if (param & CD_DECRYPT) { // fix the flags inside the NCCH copy for decrypted
+        ncch->flags[3] = 0x00;
+        ncch->flags[7] &= (0x01|0x20)^0xFF;
+        ncch->flags[7] |= 0x04;
+    }
+	if (param & CD_MAKECIA) { // CIA stub, including header, cert, ticket, TMD
         if (!DebugFileWrite((void*) cia_stub, cia.offset_content, 0)) {
             FileClose();
             Wait();
@@ -1981,7 +1996,9 @@ u32 Convert3dstoCIA(u32 index)
 			
 			if (FileInjectTo(filename, 0, offset, size, false, buffer, BUFFER_MAX_SIZE) != size) {
                 
-				DrawStringFColor(RED, TRANSPARENT, 95, 115, true, "Content not readable or has bad size");
+				DrawStringFColor(RED, TRANSPARENT, 95, 115, true, "Content not readable");
+				DrawStringFColor(RED, TRANSPARENT, 95, 125, true, "or");
+				DrawStringFColor(RED, TRANSPARENT, 95, 135, true, "has bad size");
 				FileClose();
                 Wait();
 				continue;

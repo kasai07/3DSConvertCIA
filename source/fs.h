@@ -3,13 +3,20 @@
 #include "common.h"
 
 
-#define GAME_DIRS   "/Game3ds"
+#define GAME_DIRS   "/Game3ds/3ds"
 #define WORK_DIRS   "/payload_a9lh"
+
+size_t HID_Pad();
+size_t HID_Flag();
+size_t BatteryLevel();
+size_t Level3D();
+size_t VolumeLevel();
 
 
 u32 Wait();
 u32 cartpresent();
-u32 drawimage(char* data, int posX, int posY,int tailleX, int tailleY);
+u32 drawimage(bool screen, char* data, int bits, int posX, int posY,int tailleX, int tailleY);
+
 u32 InitKeys();
 
 bool InitFS();

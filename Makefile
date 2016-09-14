@@ -16,11 +16,11 @@ include $(DEVKITARM)/ds_rules
 # INCLUDES is a list of directories containing header files
 # SPECS is the directory containing the important build and link files
 #---------------------------------------------------------------------------------
-export TARGET	:=	up_3DSconvertCIA
+export TARGET	:=	3DSconvertCIA
 BUILD		:=	build
-SOURCES		:=	source source/fatfs source/abstraction source/payload source/tga source/decryptor source/gamecart source/images
+SOURCES		:=	source source/fatfs source/abstraction source/payload source/tga source/decryptor source/gamecart source/images source/ramdumper
 DATA		:=	data
-INCLUDES	:=	source source/fatfs source/payload source/tga source/decryptor source/decryptor source/gamecart source/images
+INCLUDES	:=	source source/fatfs source/payload source/tga source/decryptor source/decryptor source/gamecart source/images source/ramdumper
 
 #---------------------------------------------------------------------------------
 # THEME: if set to anything, name of the themes file folder inside resources
@@ -32,18 +32,11 @@ THEME	:=
 #---------------------------------------------------------------------------------
 ARCH	:=	-mthumb -mthumb-interwork -flto
 
-CFLAGS	:=	-Os -g -mword-relocations \
-			-march=armv5te -mtune=arm946e-s -fomit-frame-pointer\
-			-ffast-math -std=c99\
+CFLAGS	:=	-std=gnu99 -Os -g -mword-relocations -fomit-frame-pointer -ffast-math\
 			$(ARCH)
 
 CFLAGS	+=	$(INCLUDE) -DEXEC_$(EXEC_METHOD) -DARM9 -D_GNU_SOURCE
 
-CFLAGS	+=	-DBUILD_NAME="\"$(TARGET) (`date +'%Y/%m/%d'`)\""
-
-ifneq ($(strip $(THEME)),)
-CFLAGS	+=	-DUSE_THEME=\"\/$(THEME)\"
-endif
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 
@@ -62,7 +55,7 @@ LIBS	:=
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:= $(CTRULIB)
+LIBDIRS	:= 
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
@@ -73,8 +66,6 @@ ifneq ($(BUILD),$(notdir $(CURDIR)))
 
 export OUTPUT_D	:=	$(CURDIR)/output
 export OUTPUT	:=	$(OUTPUT_D)/$(TARGET)
-export RELEASE	:=	$(CURDIR)/release
-export STARTER	:=	$(CURDIR)/starter
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 			$(foreach dir,$(DATA),$(CURDIR)/$(dir))
@@ -109,7 +100,7 @@ export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 
 export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 
-.PHONY: common clean all gateway a9lh cakehax cakerop brahma release
+.PHONY: common clean all a9lh 
 
 #---------------------------------------------------------------------------------
 all: a9lh
@@ -121,68 +112,14 @@ common:
 submodules:
 	@-git submodule update --init --recursive
 
-gateway: common
-	@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile EXEC_METHOD=GATEWAY
-	@cp resources/LauncherTemplate.dat $(OUTPUT_D)/Launcher.dat
-	@dd if=$(OUTPUT).bin of=$(OUTPUT_D)/Launcher.dat bs=1497296 seek=1 conv=notrunc
-
 a9lh: common
 	@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile EXEC_METHOD=A9LH
 
-cakehax: submodules common
-	@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile EXEC_METHOD=GATEWAY
-	@make dir_out=$(OUTPUT_D) name=$(TARGET).dat -C CakeHax bigpayload
-	@dd if=$(OUTPUT).bin of=$(OUTPUT).dat bs=512 seek=160
-    
-cakerop: cakehax
-	@make DATNAME=$(TARGET).dat DISPNAME=$(TARGET) GRAPHICS=../resources/CakesROP -C CakesROP
-	@mv CakesROP/CakesROP.nds $(OUTPUT_D)/$(TARGET).nds
-
-brahma: submodules a9lh
-	@[ -d BrahmaLoader/data ] || mkdir -p BrahmaLoader/data
-	@cp $(OUTPUT).bin BrahmaLoader/data/payload.bin
-	@cp resources/BrahmaAppInfo BrahmaLoader/resources/AppInfo
-	@cp resources/BrahmaIcon.png BrahmaLoader/resources/icon.png
-	@make --no-print-directory -C BrahmaLoader APP_TITLE=$(TARGET)
-	@mv BrahmaLoader/output/*.3dsx $(OUTPUT_D)
-	@mv BrahmaLoader/output/*.smdh $(OUTPUT_D)
-	
-release:
-	@rm -fr $(BUILD) $(OUTPUT_D) $(RELEASE)
-	@make --no-print-directory gateway
-	@-make --no-print-directory cakerop
-	@rm -fr $(BUILD) $(OUTPUT).bin $(OUTPUT).elf
-	@-make --no-print-directory brahma
-	@[ -d $(RELEASE) ] || mkdir -p $(RELEASE)
-	@[ -d $(RELEASE)/3DS ] || mkdir -p $(RELEASE)/3DS
-	@[ -d $(RELEASE)/3DS/$(TARGET) ] || mkdir -p $(RELEASE)/3DS/$(TARGET)
-	@[ -d $(RELEASE)/EmuNAND9 ] || mkdir -p $(RELEASE)/EmuNAND9
-	@cp $(OUTPUT_D)/Launcher.dat $(RELEASE)
-	@-cp $(OUTPUT).bin $(RELEASE)
-	@-cp $(OUTPUT).dat $(RELEASE)
-	@-cp $(OUTPUT).nds $(RELEASE)
-	@-cp $(OUTPUT).3dsx $(RELEASE)/3DS/$(TARGET)
-	@-cp $(OUTPUT).smdh $(RELEASE)/3DS/$(TARGET)
-	@-cp README.md $(RELEASE)
-	@[ -d $(RELEASE)/starterGen ] || mkdir -p $(RELEASE)/starterGen
-	@-[ "$(TARGET)" != "BootPayload9" ] || cp $(OUTPUT).bin $(STARTER)/extstarterpack/arm9payloads
-	@-[ "$(TARGET)" = "BootPayload9" ] || (([ -d $(STARTER)/extstarterpack/3DS/$(TARGET) ] || mkdir $(STARTER)/extstarterpack/3DS/$(TARGET)) && cp $(RELEASE)/3DS/$(TARGET)/*.* $(STARTER)/extstarterpack/3DS/$(TARGET))
-	@-[ ! -n "$(strip $(THEME))" ] || (mkdir $(RELEASE)/$(THEME) && cp $(CURDIR)/resources/$(THEME)/*.bin $(RELEASE)/$(THEME))
-	@-[ ! -n "$(strip $(THEME))" ] || (([ -d $(STARTER)/extstarterpack/$(THEME) ] || mkdir $(STARTER)/extstarterpack/$(THEME)) && cp $(CURDIR)/resources/$(THEME)/*.bin $(STARTER)/extstarterpack/$(THEME))
-	@-make --no-print-directory -C $(STARTER) -f $(STARTER)/Makefile
-	@-cp $(STARTER)/output/starter.bin $(RELEASE)/EmuNAND9
-	@-cp $(STARTER)/output/drop_zip_here.* $(RELEASE)/starterGen
-	@-cp $(STARTER)/output/ZIP3DSFX.3dsx $(RELEASE)/starterGen
-	@-7z a $(RELEASE)/$(TARGET)-`date +'%Y%m%d-%H%M%S'`.zip $(RELEASE)/*
-
-#---------------------------------------------------------------------------------
+  
 clean:
-	@echo clean ...
-	@-make clean --no-print-directory -C CakeHax
-	@-make clean --no-print-directory -C CakesROP
-	@-make clean --no-print-directory -C BrahmaLoader
-	@-make clean --no-print-directory -C starter
-	@rm -fr $(BUILD) $(OUTPUT_D) $(RELEASE)
+	@echo clean...
+	
+	@rm -fr $(BUILD) $(OUTPUT_D)
 
 
 #---------------------------------------------------------------------------------

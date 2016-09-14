@@ -24,7 +24,7 @@ typedef unsigned char	uchar;
 	ui32 offset = (HEIGHT * x + HEIGHT - y ) * BPP;\
 	*((ui8*)buffer + offset++) = rgb >> 16;\
 	*((ui8*)buffer + offset++) = rgb >> 8;\
-	*((ui8*)buffer + offset++) = rgb & 0xFF;;\
+	*((ui8*)buffer + offset++) = rgb & 0xFF;\
 }
 
 #define PATHLOGO			"/Launcher_A9LH/logo"

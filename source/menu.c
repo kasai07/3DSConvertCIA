@@ -13,7 +13,9 @@
 #include "menucia.h"
 #include "menudumpcart.h"
 #include "button.h"
-
+#include "Barre_smdh.h"
+#include "smdh.h"
+#include "i2c.h"
 
 char* menulist[] = {
 "Dump Cart to CIA",
@@ -36,95 +38,71 @@ u32 MenuCIA()
 {
 	u32 index = 0;
 	u32 refresh = 0;
-	u32 count = PathMenucia();
-	
+	u32 count = PathMenu(1);
 	Cart.Cart = 0;
-	Cart.InitSD = 0;
 	DrawMenu(count, index, true , 1, Cart);
-	
 	
 	while (true) 
 	{
-		
 		bool DrawTop = true;
         u32 pad_state = InputWait();
 		if (pad_state & BUTTON_X) {
-            
 			if(count != 0)
 			{
 				DeleteFileGame(index, 1);
 				refresh = 1;
 			}
-			
-		} else if (pad_state & BUTTON_B) {
-            
+		} else if (pad_state & BUTTON_SELECT) {
+            Screenshot(NULL);
+        } else if (pad_state & BUTTON_B) {
 			refresh = 1;
-			Cart.InitSD = 1;
-			
-		} else if (pad_state & BUTTON_R1) {
-            
+		}  else if (pad_state & BUTTON_R1) {
 			MenuDumpCart();
-			
-		} else if (pad_state & BUTTON_L1) {
-            
+		}  else if (pad_state & BUTTON_L1) {
 			Menu3DS();
-			
-		} else if (pad_state & BUTTON_DOWN) {
-           
+		}  else if (pad_state & BUTTON_DOWN) {
 		   index = (index == count - 1) ? 0 : index + 1;
            DrawTop = false;
-			
 		} else if (pad_state & BUTTON_UP) {
-            
 			index = (index == 0) ? count - 1 : index - 1;
 			DrawTop = false;
-		} else if (pad_state & BUTTON_START) {
-           
+		} else if (padflag_state == BUTTON_POWER) {
 		   DeinitFS();
 		   PowerOff();
-		   
-        } else if (pad_state & BUTTON_SELECT) {
-           
+		} else if (padflag_state == BUTTON_HOME) {
 		   DeinitFS();
 		   Reboot();
         } else {
-			
 			DrawTop = false;
-			
 		}
-		
 		if(refresh == 1)
 		{
-			count = PathMenucia();
+			DeinitFS();
+			InitFS();
+			count = PathMenu(1);
 			DrawTop = true;
 			refresh = 0;
 			index = 0;
-			
 		}
+		
 		DrawMenu(count, index, DrawTop, 1, Cart);
 	}
-	
-
 }
+
 u32 MenuDumpCart()
 {
-	
 	u32 index = 0;
 	u32 refresh = 0;
 	u32 count = 8;
 	Cart.Cart = 1;
-	Cart.InitSD = 0;
 	DrawMenu(count, index, true, 2, Cart);
 	
 	while (true) 
 	{
-    
-		
 		bool DrawTop = true;
 		u32 pad_state = InputWait();
 		
 		if (pad_state & BUTTON_A) {
-			
 			Cart.count = 0;
 			if(index == 0)DumpGameCart(CD_DECRYPT | CD_MAKECIA);
 			if(index == 1)DumpGameCart(CD_DECRYPT);
@@ -135,217 +113,166 @@ u32 MenuDumpCart()
 			if(index == 6)DumpGameCart(CD_TRIM);
 			if(index == 7)DumpPrivateHeader(0);
 			refresh = 1;
-			
 		} else if (pad_state & BUTTON_B) {
-           
 			refresh = 1;
-			Cart.Cart = 1;
-			Cart.InitSD = 1;
-			
-		} else if (pad_state & BUTTON_R1) {
-		 
+		} else if (pad_state & BUTTON_SELECT) {
+            Screenshot(NULL);
+        } else if (pad_state & BUTTON_R1) {
 			Menu3DS();
-			
 		} else if (pad_state & BUTTON_L1) {
-		  
 			MenuCIA();
-			
-		  
 		} else if (pad_state & BUTTON_DOWN) {
-           
 		   index = (index == count - 1) ? 0 : index + 1;
            DrawTop = false;
-			
 		} else if (pad_state & BUTTON_UP) {
-            
 			index = (index == 0) ? count - 1 : index - 1;
 			DrawTop = false;
-		} else if (pad_state & BUTTON_START) {
-           
+		} else if (padflag_state == BUTTON_POWER) {
 		   DeinitFS();
 		   PowerOff();
-		  
-        }else if (pad_state & BUTTON_SELECT) {
-           
+		 }else if (padflag_state == BUTTON_HOME) {
 		   DeinitFS();
 		   Reboot();
-		   
-        } else {
-			
+		} else {
 			DrawTop = false;
-			
 		}
-		
 		if(refresh == 1)
 		{
-			
+			Cart.Cart = 1;
+			DeinitFS();
+			InitFS();
 			DrawTop = true;
 			refresh = 0;
 			index = 0;
-			
 		}
+		
 		DrawMenu(count, index, DrawTop, 2, Cart);
 	}
-	
 }
-
 
 u32 Menu3DS()
 {
-    
-	//Mise en memoire des noms des payload dans le "char c"
-	//et retourne "count" le nombre de payload present
-	
-	
-    
 	u32 index = 0;
-	
 	u32 refresh = 0;
-	u32 count = PathMenu3ds();
+	u32 count = PathMenu(0);
 	Cart.Cart = 0;
-	Cart.InitSD = 0;
-	
 	DrawMenu(count, index, true, 0, Cart);
-   
- // main processing loop
-    while (true) 
+	
+	while (true) 
 	{
-        
-		
-		
-		bool DrawTop = true;
+        bool DrawTop = true;
         u32 pad_state = InputWait();
         
+		
+		
 		if (pad_state & BUTTON_A) {
             Cart.count = 0;
 			Convert3dstoCIA(index);
 			refresh = 1;
 		} else if (pad_state & BUTTON_B) {
-            
 			refresh = 1;
-			Cart.InitSD = 1;
-			
 		} else if (pad_state & BUTTON_DOWN) {
-           
 		   index = (index == count - 1) ? 0 : index + 1;
            DrawTop = false;
-			
 		} else if (pad_state & BUTTON_UP) {
-            
 			index = (index == 0) ? count - 1 : index - 1;
 			DrawTop = false;
-			
 		} else if (pad_state & BUTTON_R1) {
-            
 			MenuCIA();
-			refresh = 1;
-			
-		} else if (pad_state & BUTTON_L1) {
-            
+		}  else if (pad_state & BUTTON_L1) {
 			MenuDumpCart();
-			refresh = 1;
-			
-		} else if (pad_state & BUTTON_X) {
-            
+		} else if (pad_state & BUTTON_SELECT) {
+            Screenshot(NULL);
+        } else if (pad_state & BUTTON_X) {
 			if(count != 0)
 			{
 				DeleteFileGame(index, 0);
 				refresh = 1;
 			}
-		} else if (pad_state & BUTTON_START) {
+		} else if (padflag_state == BUTTON_POWER) {
            DeinitFS();
 		   PowerOff();
-        } else if (pad_state & BUTTON_SELECT) {
+        } else if (padflag_state == BUTTON_HOME) {
            DeinitFS();
 		   Reboot();
-        }else {
-			
+        } else {
 			DrawTop = false;
-			
 		}
-		
 		if(refresh == 1)
 		{
-			count = PathMenu3ds();
+			DeinitFS();
+			InitFS();
+			count = PathMenu(0);
 			DrawTop = true;
 			refresh = 0;
 			index = 0;
-			
 		}
 		
 		DrawMenu(count, index, DrawTop, 0, Cart);
-        
     }
-    
- 
 }
+
 void DrawMenu(u32 count, u32 index, bool DrawTop, u32 menudraw, ListMenu Cart)
 {
-    
-	char pathtga[60];
-	
-	if (DrawTop) { // draw full menu top
+    if (DrawTop) {
         
 		ClearScreenFull(true, false);
+		loadtga(true,false,"Game3ds/menu/topbg.tga",0,0);
 		
-		snprintf(pathtga, 60, "Game3ds/menu/topbg.tga");
-		loadtga(true,false,pathtga,0,0);
 		if(menudraw == 2)
 		{
 			
 			for (u32 i = 0; i < count; i++) 
 			{
-				drawimage(button, 25, 50 + (i*13), 350, 11);//button
+				drawimage(true, button, 32, 25, 50 + (i*13), 350, 11);//button
 			}
 		}
-		drawimage(titre, 107, 5, 185, 20);//titre
-		if(menudraw == 0)drawimage(menu3ds, 162, 30, 75, 14);//menu 3ds
-		if(menudraw == 1)drawimage(menucia, 165, 30, 81, 14);//menu cia
-		if(menudraw == 2)drawimage(menudumpcart, 132, 30, 135, 17);//menu dump crat
+		
+		drawimage(true, titre, 32, 107, 5, 185, 20);//titre
+		if(menudraw == 0)drawimage(true, menu3ds, 32, 162, 30, 75, 14);//menu 3ds
+		if(menudraw == 1)drawimage(true, menucia, 32, 160, 30, 81, 14);//menu cia
+		if(menudraw == 2)drawimage(true, menudumpcart, 32, 132, 30, 135, 17);//menu dump cart
 		if(count == 0)DrawStringFColor(RED  , TRANSPARENT, 200 - ((16 * 8) / 2), 120, true,"Game Not Found !");
 		
+		ClearScreenFull(false, true);
+		loadtga(false,true,"Game3ds/menu/botbg.tga",0,0);
 		
-	//--------------------bottom-------------
-	
-	ClearScreenFull(false, true);
-	snprintf(pathtga, 60, "Game3ds/menu/botbg.tga");
-	
-	loadtga(false,true,pathtga,0,0);
-    
-	if(Cart.Cart == 1)titlescreen();
-	if(Cart.InitSD == 1)InitFS();
-	DrawStringFColor(WHITE, TRANSPARENT, 20, 50, false, "START:Poweroff");
-	DrawStringFColor(WHITE, TRANSPARENT, 20, 60, false, "SELECT:Reboot");
-	if(menudraw == 0)
-    {
-		DrawStringFColor(GREEN, TRANSPARENT, 20, 80, false, "A : Convert");
-		DrawStringFColor(RED, TRANSPARENT, 20, 90, false, "B : Refresh");
-		DrawStringFColor(PURPLE, TRANSPARENT, 20, 110, false, "X : Delete Game");
-		DrawStringFColor(WHITE, TRANSPARENT, 20, 140, false, "R1 : Menu CIA");
-		DrawStringFColor(WHITE, TRANSPARENT, 20, 150, false, "L1 : Menu Dump Cart");
-	}
-	if(menudraw == 1)
-    {
-		DrawStringFColor(RED, TRANSPARENT, 20, 90, false, "B : Refresh");
-		DrawStringFColor(PURPLE, TRANSPARENT, 20, 110, false, "X : Delete Game");
-		DrawStringFColor(WHITE, TRANSPARENT, 20, 140, false, "R1 : Menu Dump Cart");
-		DrawStringFColor(WHITE, TRANSPARENT, 20, 150, false, "L1 : Menu 3DS");
-	}
-	if(menudraw == 2)
-    {
-		DrawStringFColor(GREEN, TRANSPARENT, 20, 80, false, "A : Launch");
-		DrawStringFColor(RED, TRANSPARENT, 20, 90, false, "B : Refresh cartridge");
-		DrawStringFColor(WHITE, TRANSPARENT, 20, 140, false, "R1 : Menu 3DS");
-		DrawStringFColor(WHITE, TRANSPARENT, 20, 150, false, "L1 : Menu CIA");
-	}
-	if (CheckSD()) {
-			DrawStringFColor(WHITE, TRANSPARENT, 5, SCREEN_HEIGHT - 30, false, "SD storage:   %lluMB", TotalStorageSpace() / (1024*1024));
+		if(Cart.Cart == 1)titlescreen();
+		DrawStringFColor(WHITE, TRANSPARENT, 20, 50, false, "Power:PowerOFF");
+		DrawStringFColor(WHITE, TRANSPARENT, 20, 60, false, "Home:Reboot");
+		DrawStringFColor(WHITE, TRANSPARENT, 20, 140, false, "Select : ScreenShot");
+		
+		if(menudraw == 0)
+		{
+			DrawStringFColor(GREEN, TRANSPARENT, 20, 80, false, "A : Convert");
+			DrawStringFColor(RED, TRANSPARENT, 20, 90, false, "B : Refresh");
+			DrawStringFColor(PURPLE, TRANSPARENT, 20, 120, false, "X : Delete the Game");
+			DrawStringFColor(WHITE, TRANSPARENT, 20, 150, false, "R1 : Menu CIA");
+			DrawStringFColor(WHITE, TRANSPARENT, 20, 160, false, "L1 : Menu Dump Cart");
+		}
+		if(menudraw == 1)
+		{
+			
+			DrawStringFColor(RED, TRANSPARENT, 20, 90, false, "B : Refresh");
+			DrawStringFColor(PURPLE, TRANSPARENT, 20, 120, false, "X : Delete the Game");
+			DrawStringFColor(WHITE, TRANSPARENT, 20, 150, false, "R1 : Menu Dump Carte");
+			DrawStringFColor(WHITE, TRANSPARENT, 20, 160, false, "L1 : Menu 3DS");
+		}
+		if(menudraw == 2)
+		{
+			DrawStringFColor(GREEN, TRANSPARENT, 20, 80, false, "A : Launch");
+			DrawStringFColor(RED, TRANSPARENT, 20, 90, false, "B : refresh cartridge");
+			DrawStringFColor(WHITE, TRANSPARENT, 20, 150, false, "R1 : Menu 3DS");
+			DrawStringFColor(WHITE, TRANSPARENT, 20, 160, false, "L1 : Menu CIA");
+		}
+		if (CheckSD()) {
+			DrawStringFColor(WHITE, TRANSPARENT, 5, SCREEN_HEIGHT - 30, false, "SD Storage:   %lluMB", TotalStorageSpace() / (1024*1024));
 			DrawStringFColor(WHITE, TRANSPARENT, 5, SCREEN_HEIGHT - 20, false, "      Used:   %lluMB", TotalStorageSpace() / (1024*1024) - RemainingStorageSpace() / (1024*1024));
 			DrawStringFColor(WHITE, TRANSPARENT, 5, SCREEN_HEIGHT - 10, false, "      Free:   %lluMB", RemainingStorageSpace() / (1024*1024));
-		
-	} else {
-		DrawStringFColor(RED  , TRANSPARENT, 5, SCREEN_HEIGHT - 20, false, "SD storage: unknown filesystem");
-    }
+			
+		} else {
+			DrawStringFColor(RED  , TRANSPARENT, 5, SCREEN_HEIGHT - 20, false, "SD storage: unknown filesystem");
+		}
 	}
 	//---------------------------------------
 	if(menudraw == 2)
@@ -363,23 +290,43 @@ void DrawMenu(u32 count, u32 index, bool DrawTop, u32 menudraw, ListMenu Cart)
 		
 	} else {
 		
-		for (u32 i = 0; i < count; i++) 
-		{
-			
-			drawimage(button, 25, 50 + (i*13), 350, 11);//button
-			if(i >= 12)break;
+		if(menudraw == 0)
+		{	
+			for (u32 i = 0; i < count; i++) 
+			{
+				drawimage(true, button,32, 25, 50 + (i*13), 350, 11);//button
+				if(i >= 12)break;
+			}
+			if(index == 0)menupos.pos2 = 0;	
+			if(count > 12)
+			{
+				if((menupos.pos2 + 12) < index)menupos.pos2++;
+				if(menupos.pos2 > index)menupos.pos2--;
+				if(index == count - 1)menupos.pos2 = count - 13;
+			}
+			menupos.pos = menupos.pos2;
 		}
 		
-		if(index == 0)menupos.pos2 = 0;	
-		if(count > 12)
-		{
-			if((menupos.pos2 + 12) < index)menupos.pos2++;
-			if((menupos.pos2 + 12) > count){menupos.pos2 = (count - 12);}
-			if(menupos.pos2 > index)menupos.pos2--;
-			if(index == count - 1)menupos.pos2 = count - 13;
+		if(menudraw == 1)
+		{	
+			drawimage(true, Barre_smdh,24, 25, 163, 350, 52);
+			if(count != 0)icone_Large(index, true, false, 27, 165, 0, 0);
+			
+			for (u32 i = 0; i < count; i++) 
+			{
+				drawimage(true, button,32, 25, 50 + (i*13), 350, 11);//button
+				if(i >= 7)break;
+			}
+			
+			if(index == 0)menupos.pos2 = 0;	
+			if(count > 7)
+			{
+				if((menupos.pos2 + 7) < index)menupos.pos2++;
+				if(menupos.pos2 > index)menupos.pos2--;
+				if(index == count - 1)menupos.pos2 = count - 8;
+			}
+			menupos.pos = menupos.pos2;
 		}
-		menupos.pos = menupos.pos2;
-	
 		
 		for (u32 i = 0; i < count; i++) 
 		{
@@ -405,8 +352,11 @@ void DrawMenu(u32 count, u32 index, bool DrawTop, u32 menudraw, ListMenu Cart)
 					DrawStringFColor(SELECT, TRANSPARENT, 200 - ((compteur[menupos.pos] * 8) / 2), 50 + (i*13 + 2), true, "%s", c[menupos.pos]);
 				}
 			}
+			
 			menupos.pos++;
-			if(i >= 12)break;
+			if(menudraw == 0){if(i >= 12)break;}
+			if(menudraw == 1){if(i >= 7)break;}
+		
 		}
 	}
 }

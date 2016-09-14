@@ -4,7 +4,7 @@
 
 
 typedef struct {
-   
+    
 	char* name;
 	char* ctr;
 	u32 adress;

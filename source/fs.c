@@ -10,39 +10,60 @@
 #include "i2c.h"
 #include "fatfs/ff.h"
 #include "fatfs/sdmmc.h"
-
+#include "common.h"
 
 static bool fs_ok = false;
 static FATFS fs;
 static FIL file;
 static DIR dir;
 
-u32 drawimage(char*data, int posX, int posY,int tailleX, int tailleY)
+u32 drawimage(bool screen, char* data, int bits, int posX, int posY,int tailleX, int tailleY)
 {
-	u8 r,g,b,a;
+	u8 r,g,b,a = 0xFF;
 	int dir = 0;
 	for(int i = tailleY; 0 < i; i--)
 	{	 
 		
 		for(int j = 0; j < tailleX; j++)	
 		{
-			
 			b = (data[dir++]);
 			g = (data[dir++]);
 			r = (data[dir++]);
-			a = (data[dir++]);
+			if(bits == 32)
+			{
+				a = (data[dir++]);
+				
+				if(a == 0x00)
+				{
+					ui32 passe = (HEIGHT * posX+j + HEIGHT - posY+i ) * BPP;
+					*((ui8*)TOP_SCREEN0 + passe++);
+					*((ui8*)TOP_SCREEN0 + passe++);
+					*((ui8*)TOP_SCREEN0 + passe++);
+					
+					
+				}else{
+					if(screen == true){
+					SET_PIXEL(TOP_SCREEN0, (posX+j), (posY+i), RGBCOLOR(r,g,b));
+					SET_PIXEL(TOP_SCREEN1, (posX+j), (posY+i), RGBCOLOR(r,g,b));
+					}
+					if(screen == false){
+					SET_PIXEL(BOT_SCREEN0, (posX+j), (posY+i), RGBCOLOR(r,g,b));
+					SET_PIXEL(BOT_SCREEN1, (posX+j), (posY+i), RGBCOLOR(r,g,b));
+					}
+				}
+			}
 			
-			if(a == 0x00)
+			if(bits == 24)
 			{
-				ui32 passe = (HEIGHT * posX+j + HEIGHT - posY+i ) * BPP;
-				*((ui8*)TOP_SCREEN0 + passe++);
-				*((ui8*)TOP_SCREEN0 + passe++);
-				*((ui8*)TOP_SCREEN0 + passe++);
-				
-				
-			}else
-			{
+				if(screen == true){
 				SET_PIXEL(TOP_SCREEN0, (posX+j), (posY+i), RGBCOLOR(r,g,b));
+				SET_PIXEL(TOP_SCREEN1, (posX+j), (posY+i), RGBCOLOR(r,g,b));
+				}
+				if(screen == false){
+				SET_PIXEL(BOT_SCREEN0, (posX+j), (posY+i), RGBCOLOR(r,g,b));
+				SET_PIXEL(BOT_SCREEN1, (posX+j), (posY+i), RGBCOLOR(r,g,b));
+				}
+				
 			}
 		}			
 	}
@@ -458,19 +479,37 @@ uint64_t TotalStorageSpace()
         return -1;
     return ClustersToBytes(&fs, fs.n_fatent - 2);
 }
+
+size_t HID_Flag()
+{
+    return i2cReadRegister(I2C_DEV_MCU, 0x10);   
+}
+size_t HID_Pad()
+{
+    return i2cReadRegister(I2C_DEV_DEBUGPAD, 0x00);   
+}
 void Reboot()
 {
     i2cWriteRegister(I2C_DEV_MCU, 0x20, 1 << 2);
     while(true);
 }
-
-
 void PowerOff()
 {
     i2cWriteRegister(I2C_DEV_MCU, 0x20, 1 << 0);
     while (true);
 }
-
+size_t Level3D()
+{
+    return i2cReadRegister(I2C_DEV_MCU, 0x08);   
+}
+size_t VolumeLevel()
+{
+    return i2cReadRegister(I2C_DEV_MCU, 0x09);   
+}
+size_t BatteryLevel()
+{
+    return i2cReadRegister(I2C_DEV_MCU, 0x0B);   
+}
 
 size_t FileInjectTo(const char* dest, u32 offset_in, u32 offset_out, u32 size, bool overwrite, void* buf, size_t bufsize)
 {
@@ -633,6 +672,3 @@ void ShowProgress(u64 current, u64 total)
 
 }
 #endif
-
-
-

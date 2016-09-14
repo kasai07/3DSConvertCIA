@@ -67,5 +67,5 @@ void DebugColor(int colorfont, int colorbg, u8* screen, const char *format, ...)
 
 
 void ShowProgress(u64 current, u64 total);
-
+u32 dumpram();
 void loadSplash();
