@@ -22,10 +22,11 @@ typedef struct {
    
 	u32 pos;
 	u32 pos2;
+	u32 refresh;
 	
 } Menu;
 
-Menu menupos;
+Menu menu;
 
 u32 Menu3DS();
 

@@ -6,9 +6,17 @@
 #define GAME_DIRS   "/Game3ds/3ds"
 #define WORK_DIRS   "/payload_a9lh"
 
+static inline u32 osGetKernelVersion(void)
+{
+	return (*(vu32*)0x1FF80000) & ~0xFF;
+}
+
+void PowerOff();
+void Reboot();
 size_t HID_Pad();
 size_t HID_Flag();
 size_t BatteryLevel();
+size_t Batterycharge();
 size_t Level3D();
 size_t VolumeLevel();
 
@@ -81,10 +89,6 @@ uint64_t TotalStorageSpace();
 
 void FileClose();
 void DirClose();
-
-void PowerOff();
-void Reboot();
-
 
 const char* GetGameDir();
 bool GetFileList(const char* path, char* list, int lsize, bool recursive, bool inc_files, bool inc_dirs);

@@ -22,11 +22,12 @@
 #define YELLOW			COLOR_YELLOW
 #define PURPLE			COLOR_PURPLE
 #define GREY			COLOR_GREY
+#define ORANGE			COLOR_ORANGE
 
 #define SELECT			COLOR_SELECT
-
 #define COLOR_SELECT        RGB(0xD7, 0x9A, 0x28)
 
+#define COLOR_ORANGE        RGB(0xFF, 0x7F, 0x00)
 #define COLOR_YELLOW        RGB(0xFF, 0xFF, 0x00)
 #define COLOR_BLACK         RGB(0x00, 0x00, 0x00)
 #define COLOR_WHITE         RGB(0xFF, 0xFF, 0xFF)

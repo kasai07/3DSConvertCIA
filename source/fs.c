@@ -11,6 +11,8 @@
 #include "fatfs/ff.h"
 #include "fatfs/sdmmc.h"
 #include "common.h"
+#include "platform.h"
+
 
 static bool fs_ok = false;
 static FATFS fs;
@@ -69,16 +71,22 @@ u32 drawimage(bool screen, char* data, int bits, int posX, int posY,int tailleX,
 	}
 }
 
-/* Volume - Partition resolution table (default table) */
 u32 InitKeys()
 {
-	SetupSector0x96Key0x11(); // Sector0x96 key - no effect on error level
-	SetupTwlKey0x03();   // TWL KeyX / KeyY
+	SetupSector0x96Key0x11(); 			// Sector0x96 key
+	SetupTwlKey0x03();   				// TWL KeyX / KeyY
+	if ((GetUnitPlatform() == PLATFORM_N3DS) && (SetupCtrNandKeyY0x05() != 0))
+	{	
+		Debug("KeyY0x05 no found !"); 	// N3DS CTRNAND KeyY
+		Wait();
+	}
 	
 	LoadKeyFromFile(0x25, 'X', NULL); 	// NCCH 7x KeyX
     LoadKeyFromFile(0x18, 'X', NULL);	// NCCH Secure3 KeyX
     LoadKeyFromFile(0x1B, 'X', NULL); 	// NCCH Secure4 KeyX
 	LoadKeyFromFile(0x24, 'Y', NULL);	// AGBSAVE CMAC KeyY
+		
+
 }
 
 u32 Wait()
@@ -482,20 +490,18 @@ uint64_t TotalStorageSpace()
 
 size_t HID_Flag()
 {
-    return i2cReadRegister(I2C_DEV_MCU, 0x10);   
-}
-size_t HID_Pad()
-{
-    return i2cReadRegister(I2C_DEV_DEBUGPAD, 0x00);   
+    return i2cReadRegister(I2C_DEV_MCU, 0x10);// (*(volatile u8*)0x10147021) 
 }
 void Reboot()
 {
-    i2cWriteRegister(I2C_DEV_MCU, 0x20, 1 << 2);
+    DeinitFS();
+	i2cWriteRegister(I2C_DEV_MCU, 0x20, 1 << 2);
     while(true);
 }
 void PowerOff()
 {
-    i2cWriteRegister(I2C_DEV_MCU, 0x20, 1 << 0);
+    DeinitFS();
+	i2cWriteRegister(I2C_DEV_MCU, 0x20, 1 << 0);
     while (true);
 }
 size_t Level3D()
@@ -509,6 +515,10 @@ size_t VolumeLevel()
 size_t BatteryLevel()
 {
     return i2cReadRegister(I2C_DEV_MCU, 0x0B);   
+}
+size_t Batterycharge()
+{
+    return i2cReadRegister(I2C_DEV_MCU, 0x0F);  //(*(volatile u8*)0x10144000 
 }
 
 size_t FileInjectTo(const char* dest, u32 offset_in, u32 offset_out, u32 size, bool overwrite, void* buf, size_t bufsize)
